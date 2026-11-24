@@ -92,6 +92,16 @@
   .pdg .tile { aspect-ratio: auto; min-height: 280px; cursor: default; }
   .pdg .side { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
   .x { background: none; border: 1px solid var(--line); border-radius: 50%; width: 34px; height: 34px; }
+  .f2 { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; } .f3 { display: flex; gap: 10px; }
+  .f2 label { font-size: .85rem; color: var(--muted); }
+  .f2 input { font: inherit; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); width: 100%; }
+  .pay { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .pay label { display: flex; gap: 8px; align-items: center; }
+  .err { color: var(--sale); }
+  #co { width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 24px); }
+  #co .dr { height: auto; max-height: calc(100vh - 24px); }
+  .done { text-align: center; padding: 18px 4px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  .done b { font: 800 1.4rem var(--display); }
   #toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; z-index: 50; opacity: 0; pointer-events: none; transition: opacity .2s; }
   #toast.on { opacity: 1; }
   @media (max-width: 720px) { .hero, .pdg { grid-template-columns: 1fr; } .ib span.l { display: none; } }
@@ -137,7 +147,7 @@
   <div class="grid" id="grid"></div>
 </section>
 
-<footer><span>© Frame In. Sample store: products and prices are placeholders, and checkout is not connected.</span><span>Eyeglasses · Sunglasses · Screen glasses · Kids</span></footer>
+<footer><span>© Frame In. Prices in INR.</span><span>Eyeglasses · Sunglasses · Screen glasses · Kids</span></footer>
 </div>
 
 <dialog id="drawer"><div class="dr">
@@ -158,6 +168,24 @@
     <button class="add" id="pdAdd" type="button">Add to cart</button>
   </div>
 </div></dialog>
+<dialog id="co"><form class="dr" id="coForm" novalidate>
+  <header><h2 id="coTitle">Checkout</h2><button class="x" id="closeCo" type="button" aria-label="Close">✕</button></header>
+  <div id="coBody" class="lines">
+    <div class="f2"><label for="cn">Full name</label><input id="cn" autocomplete="name" required></div>
+    <div class="f2"><label for="cp">Mobile number</label><input id="cp" inputmode="numeric" maxlength="10" autocomplete="tel-national" required></div>
+    <div class="f2"><label for="ce">Email (optional)</label><input id="ce" type="email" autocomplete="email"></div>
+    <div class="f2"><label for="ca">Address</label><input id="ca" autocomplete="street-address" required></div>
+    <div class="f3"><div class="f2"><label for="cc2">City</label><input id="cc2" autocomplete="address-level2" required></div>
+    <div class="f2"><label for="cz">Pincode</label><input id="cz" inputmode="numeric" maxlength="6" autocomplete="postal-code" required></div></div>
+    <fieldset class="pay"><legend>Payment</legend>
+      <label id="payOnlineRow"><input type="radio" name="pay" value="online"> Pay online (UPI, cards, netbanking)</label>
+      <label><input type="radio" name="pay" value="cod" checked> Cash on delivery</label>
+    </fieldset>
+    <div class="tot"><span>Total</span><span id="coTotal"></span></div>
+    <p class="note err" id="coErr" role="alert" hidden></p>
+  </div>
+  <button class="cta" id="coPlace" type="submit">Place order</button>
+</form></dialog>
 <div id="toast" role="status"></div>
 
 <script>
@@ -168,24 +196,7 @@
     set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   };
   var C = { black: ['Black', '#1b1d22'], tort: ['Tortoise', '#8a5a2b'], navy: ['Navy', '#22407a'], gold: ['Gold', '#c59a3b'], silver: ['Silver', '#aab2bd'], rose: ['Rose', '#c9707f'], green: ['Forest', '#2e6b4f'], clear: ['Crystal', '#9fb8c9'], red: ['Cherry', '#b3262f'] };
-  var P = [
-    ['Aria', 'eye', 'round', 'Unisex', 1499, 1999, ['black', 'tort', 'gold'], 'A thin round rim that sits light on the nose.'],
-    ['Metro', 'eye', 'rect', 'Men', 1299, 1799, ['black', 'navy', 'tort'], 'The everyday rectangle, built for long days.'],
-    ['Skyline', 'sun', 'aviator', 'Unisex', 1899, 2499, ['gold', 'silver', 'black'], 'Teardrop lenses with UV400 protection.'],
-    ['Vesper', 'eye', 'cat', 'Women', 1599, 2199, ['rose', 'black', 'tort'], 'A lifted outer corner for a sharper line.'],
-    ['Hexa', 'eye', 'hex', 'Unisex', 1699, 2299, ['green', 'gold', 'black'], 'Six sides, one confident outline.'],
-    ['Wayline', 'sun', 'way', 'Men', 1799, 2299, ['black', 'tort', 'navy'], 'A classic wayfarer with polarised lenses.'],
-    ['Pixel', 'screen', 'rect', 'Unisex', 999, 1499, ['black', 'clear', 'navy'], 'Blue-light filter lenses for screen-heavy days.'],
-    ['Lumen', 'screen', 'round', 'Unisex', 1099, 1599, ['clear', 'tort', 'black'], 'Round screen glasses, zero power by default.'],
-    ['Bloom', 'sun', 'cat', 'Women', 1999, 2699, ['red', 'black', 'tort'], 'Oversized cat-eye with gradient lenses.'],
-    ['Orbit', 'sun', 'round', 'Unisex', 1599, 2099, ['gold', 'black', 'silver'], 'Round metal sunglasses with slim temples.'],
-    ['Drift', 'eye', 'way', 'Women', 1399, 1899, ['rose', 'navy', 'black'], 'A soft wayfarer in a lighter frame weight.'],
-    ['Coder', 'screen', 'hex', 'Men', 1199, 1699, ['black', 'green', 'silver'], 'Anti-glare lenses tuned for long coding sessions.'],
-    ['Sprout', 'kids', 'round', 'Kids', 899, 1299, ['red', 'navy', 'green'], 'Flexible hinges and a soft nose pad for ages 4 to 8.'],
-    ['Bolt', 'kids', 'rect', 'Kids', 949, 1349, ['navy', 'black', 'red'], 'Impact-resistant frame for active kids.'],
-    ['Strata', 'eye', 'aviator', 'Men', 1799, 2399, ['silver', 'gold', 'black'], 'Double-bridge aviator for a stronger look.'],
-    ['Sol', 'sun', 'way', 'Women', 1699, 2199, ['tort', 'rose', 'black'], 'Large wayfarer shades that block 100% UV.']
-  ].map(function (a, i) { return { id: i, name: a[0], type: a[1], shape: a[2], gender: a[3], price: a[4], was: a[5], colors: a[6], desc: a[7], pop: i % 5 }; });
+  var P = [];
   var TYPE = { eye: 'Eyeglasses', sun: 'Sunglasses', screen: 'Screen glasses', kids: 'Kids' };
   var SHAPE = { round: 'Round', rect: 'Rectangle', aviator: 'Aviator', cat: 'Cat-eye', hex: 'Hexagon', way: 'Wayfarer' };
   var LENS = {
@@ -294,11 +305,75 @@
   $('closePd').onclick = function () { $('pd').close(); };
   $('wishBtn').onclick = function () { st.cat = 'wish'; renderCats(); renderGrid(); $('products').scrollIntoView({ behavior: 'smooth' }); };
   $('shop').onclick = function () { st.cat = 'all'; renderCats(); renderGrid(); $('products').scrollIntoView({ behavior: 'smooth' }); };
-  $('checkout').onclick = function () { toast(cart.length ? 'Demo store: checkout is not connected' : 'Add a frame first'); };
+  var cfg = { online: false, keyId: null };
+  function api(path, opts) {
+    opts = opts || {}; opts.headers = { 'Content-Type': 'application/json' };
+    if (opts.body && typeof opts.body !== 'string') opts.body = JSON.stringify(opts.body);
+    return fetch(path, opts).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'Request failed'); return j; }); });
+  }
+  function cartTotal() { return cart.reduce(function (s, l) { return s + P[l.id].price * l.q; }, 0); }
+  function coErr(m) { var e = $('coErr'); e.hidden = !m; e.textContent = m || ''; }
+  function loadRzp() {
+    return new Promise(function (ok, no) {
+      if (window.Razorpay) return ok();
+      var sc = document.createElement('script'); sc.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      sc.onload = ok; sc.onerror = function () { no(new Error('Could not load the payment window. Check your connection.')); };
+      document.head.appendChild(sc);
+    });
+  }
+  function success(o) {
+    cart = []; save(); renderCart(); $('closeCart') && $('drawer').close();
+    $('coTitle').textContent = 'Order placed';
+    $('coForm').querySelector('#coBody').innerHTML = '<div class="done"><b>Thank you!</b><div>Your order <b>' + o.id + '</b> is confirmed.</div><div class="sub">' +
+      (o.method === 'cod' ? 'Pay ' + money(o.total) + ' in cash when it arrives.' : 'Payment of ' + money(o.total) + ' received.') + '</div><div class="sub">Keep this order number for support.</div></div>';
+    $('coPlace').textContent = 'Continue shopping'; $('coPlace').type = 'button'; $('coPlace').onclick = function () { location.reload(); };
+  }
+  $('checkout').onclick = function () {
+    if (!cart.length) return toast('Add a frame first');
+    $('drawer').close(); coErr('');
+    $('coTotal').textContent = money(cartTotal());
+    $('payOnlineRow').hidden = !cfg.online;
+    if (!cfg.online) $('coForm').querySelector('input[value="cod"]').checked = true;
+    $('co').showModal();
+  };
+  $('closeCo').onclick = function () { $('co').close(); };
+  $('coForm').addEventListener('submit', function (e) {
+    e.preventDefault(); if ($('coPlace').type === 'button') return;
+    var method = $('coForm').querySelector('input[name="pay"]:checked').value, btn = $('coPlace');
+    var body = {
+      items: cart.map(function (l) { return { id: l.id, color: l.c, qty: l.q }; }), method: method,
+      customer: { name: $('cn').value, phone: $('cp').value, email: $('ce').value, address: $('ca').value, city: $('cc2').value, pincode: $('cz').value }
+    };
+    coErr(''); btn.disabled = true; btn.textContent = 'Placing order…';
+    function fail(err) { btn.disabled = false; btn.textContent = 'Place order'; coErr(err.message); }
+    api('/api/orders', { method: 'POST', body: body }).then(function (o) {
+      if (method === 'cod') return success({ id: o.orderId, method: 'cod', total: o.total });
+      return Promise.all([api('/api/orders/' + o.orderId + '/pay?token=' + o.token, { method: 'POST', body: {} }), loadRzp()]).then(function (r) {
+        var pay = r[0];
+        var rz = new window.Razorpay({
+          key: pay.keyId, amount: pay.amount, currency: 'INR', order_id: pay.rzpOrderId, name: 'Frame In', description: 'Order ' + o.orderId,
+          prefill: { name: body.customer.name, contact: body.customer.phone, email: body.customer.email },
+          handler: function (resp) {
+            api('/api/payments/verify', { method: 'POST', body: { orderId: o.orderId, token: o.token, razorpay_order_id: resp.razorpay_order_id, razorpay_payment_id: resp.razorpay_payment_id, razorpay_signature: resp.razorpay_signature } })
+              .then(function (v) { success({ id: o.orderId, method: 'online', total: o.total }); })
+              .catch(function (err) { fail(new Error(err.message + ' If money was deducted, quote order ' + o.orderId + ' to support.')); });
+          },
+          modal: { ondismiss: function () { fail(new Error('Payment was not completed. Your order ' + o.orderId + ' is saved; place the order again to retry.')); } }
+        });
+        rz.on('payment.failed', function (r2) { fail(new Error((r2 && r2.error && r2.error.description) || 'Payment failed. Try again.')); });
+        rz.open();
+      });
+    }).catch(fail);
+  });
   ['drawer', 'pd'].forEach(function (id) { $(id).addEventListener('click', function (e) { if (e.target === this) this.close(); }); });
 
   $('heroArt').innerHTML = glasses('round', '#ffc83d', 'eye');
-  renderCats(); renderGrid(); renderCart();
+  Promise.all([api('/api/products'), api('/api/config')]).then(function (r) {
+    P = r[0]; cfg = r[1];
+    cart = cart.filter(function (l) { return P[l.id] && P[l.id].colors.indexOf(l.c) >= 0; });
+    wish = wish.filter(function (id) { return P[id]; });
+    renderCats(); renderGrid(); renderCart();
+  }).catch(function () { $('grid').innerHTML = '<p class="empty">Could not load frames. Please refresh.</p>'; });
 })();
 </script>
 </body>

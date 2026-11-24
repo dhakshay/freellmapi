@@ -1,0 +1,16 @@
+{
+  "name": "frame-in",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Frame In eyewear store: static storefront plus an Express/SQLite backend with Razorpay checkout.",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test server/app.test.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "express": "^4.21.2"
+  }
+}
