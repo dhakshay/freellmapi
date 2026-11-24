@@ -21,7 +21,7 @@ const fakeRzp = async () => ({ ok: true, status: 200, json: async () => ({ id: '
 
 test('catalog and config', async () => {
   const s = await boot();
-  assert.equal((await s.call('/api/products')).json.length, 16);
+  assert.equal((await s.call('/api/products')).json.length, 32);
   assert.equal((await s.call('/api/config')).json.online, false);
   s.close();
 });

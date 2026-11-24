@@ -286,9 +286,11 @@
   };
   var C = { black: ['Black', '#22252b'], tort: ['Tortoise', '#8a5a2b'], navy: ['Navy', '#2a4680'], gold: ['Gold', '#c59a3b'], silver: ['Silver', '#aab2bd'], rose: ['Rose', '#c9707f'], green: ['Forest', '#2f6b52'], clear: ['Crystal', '#9fb8c9'], red: ['Cherry', '#b3262f'] };
   var TYPE = { eye: 'Eyeglasses', sun: 'Sunglasses', screen: 'Screen glasses', kids: 'Kids' };
-  var SHAPE = { round: 'Round', rect: 'Rectangle', aviator: 'Aviator', cat: 'Cat-eye', hex: 'Hexagon', way: 'Wayfarer' };
+  var SHAPE = { round: 'Round', rect: 'Rectangle', aviator: 'Aviator', cat: 'Cat-eye', hex: 'Hexagon', way: 'Wayfarer', oval: 'Oval', square: 'Square' };
   var LENS = {
     round: 'M-26 0a26 26 0 1 0 52 0a26 26 0 1 0 -52 0Z',
+    oval: 'M-28 0Q-28 -17 0 -17Q28 -17 28 0Q28 17 0 17Q-28 17 -28 0Z',
+    square: 'M-24 -20H24Q28 -20 28 -16V16Q28 20 24 20H-24Q-28 20 -28 16V-16Q-28 -20 -24 -20Z',
     rect: 'M-20 -17H20Q27 -17 27 -10V10Q27 17 20 17H-20Q-27 17 -27 10V-10Q-27 -17 -20 -17Z',
     aviator: 'M-28 -16Q0 -22 28 -16Q30 8 14 20Q-2 26 -20 16Q-30 6 -28 -16Z',
     cat: 'M-28 -10Q-26 -22 -20 -20L28 -16Q30 4 16 16Q0 24 -18 16Q-30 8 -28 -10Z',
@@ -325,7 +327,7 @@
   function renderCats() {
     var items = [['all', 'All'], ['eye', 'Eyeglasses'], ['sun', 'Sunglasses'], ['screen', 'Screen glasses'], ['kids', 'Kids'], ['wish', 'Saved']];
     $('cats').innerHTML = items.map(function (c) { return '<button type="button" data-c="' + c[0] + '" aria-pressed="' + (st.cat === c[0]) + '">' + c[1] + '</button>'; }).join('');
-    var rep = { round: 'black', rect: 'navy', aviator: 'gold', cat: 'rose', hex: 'green', way: 'tort' };
+    var rep = { round: 'black', rect: 'navy', aviator: 'gold', cat: 'rose', hex: 'green', way: 'tort', oval: 'silver', square: 'black' };
     $('shapeRow').innerHTML = Object.keys(SHAPE).map(function (k) {
       return '<button class="shapeTile" type="button" data-s="' + k + '" aria-pressed="' + (st.shape === k) + '">' + glasses(k, C[rep[k]][1], 'eye') + '<span>' + SHAPE[k] + '</span></button>';
     }).join('');

@@ -18,6 +18,22 @@ const rows = [
   ['Bolt', 'kids', 'rect', 'Kids', 949, 1349, ['navy', 'black', 'red'], 'Impact-resistant frame for active kids.'],
   ['Strata', 'eye', 'aviator', 'Men', 1799, 2399, ['silver', 'gold', 'black'], 'Double-bridge aviator for a stronger look.'],
   ['Sol', 'sun', 'way', 'Women', 1699, 2199, ['tort', 'rose', 'black'], 'Large wayfarer shades that block 100% UV.'],
+  ['Linen', 'eye', 'oval', 'Unisex', 1399, 1899, ['tort', 'clear', 'navy'], 'Soft oval lines that flatter almost every face.'],
+  ['Haven', 'eye', 'oval', 'Women', 1599, 2099, ['rose', 'gold', 'black'], 'A gentle oval in a light, all-day frame.'],
+  ['Quill', 'eye', 'square', 'Men', 1499, 1999, ['black', 'green', 'tort'], 'A strong square frame with a calm, quiet finish.'],
+  ['Slate', 'screen', 'square', 'Men', 1099, 1599, ['black', 'navy', 'silver'], 'Matte square screen glasses with anti-glare lenses.'],
+  ['Mirage', 'sun', 'oval', 'Unisex', 1799, 2399, ['gold', 'tort', 'black'], 'Oval sunglasses with a soft gradient tint.'],
+  ['Terra', 'sun', 'square', 'Men', 1699, 2199, ['tort', 'black', 'green'], 'Earth-toned square shades with UV400 protection.'],
+  ['Willow', 'screen', 'oval', 'Women', 1199, 1699, ['rose', 'clear', 'black'], 'Light oval screen glasses for long, quiet work days.'],
+  ['Cove', 'eye', 'round', 'Women', 1499, 1999, ['rose', 'tort', 'silver'], 'A petite round frame with a smooth, easy fit.'],
+  ['Atlas', 'sun', 'rect', 'Men', 1899, 2499, ['black', 'navy', 'silver'], 'Slim rectangular sunglasses with polarised options.'],
+  ['Dune', 'eye', 'way', 'Unisex', 1399, 1899, ['tort', 'gold', 'clear'], 'A warm, easy wayfarer for everyday wear.'],
+  ['Petal', 'screen', 'cat', 'Women', 1299, 1799, ['rose', 'black', 'clear'], 'A subtle cat-eye with blue-light lenses.'],
+  ['Nimbus', 'screen', 'round', 'Unisex', 999, 1499, ['silver', 'black', 'clear'], 'Light round screen glasses, soft on the nose.'],
+  ['Ember', 'sun', 'hex', 'Unisex', 1799, 2399, ['gold', 'black', 'red'], 'Hexagon sunglasses with a warm brass finish.'],
+  ['Pebble', 'kids', 'oval', 'Kids', 899, 1299, ['rose', 'navy', 'green'], 'A soft oval frame with flexible temples, ages 4 to 8.'],
+  ['Zing', 'kids', 'square', 'Kids', 949, 1349, ['red', 'green', 'black'], 'A bright, tough square frame for busy kids.'],
+  ['Lark', 'kids', 'cat', 'Kids', 949, 1349, ['rose', 'navy', 'clear'], 'A playful cat-eye frame with a comfy fit, ages 5 to 10.'],
 ];
 
 export const PRODUCTS = rows.map((a, i) => ({
