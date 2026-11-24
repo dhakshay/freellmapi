@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Serpent Rush</title>
+<style>
+  /* Layout: one centered play column; score bar above the board, d-pad below on touch widths */
+  :root {
+    --bg: #eef2ec; --fg: #1d2a1f; --muted: #5c6b5f;
+    --board: #dfe8dc; --grid: #cdd9ca; --snake: #2f7a3e; --head: #1b5a28;
+    --food: #c8402f; --accent: #2f7a3e; --btn: #ffffff; --btn-border: #b9c7b6;
+    --font: "Space Grotesk", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #0f1511; --fg: #e3ece4; --muted: #8fa393;
+    --board: #16201a; --grid: #1c2922; --snake: #4fbf64; --head: #9bf0a8;
+    --food: #ff6b57; --accent: #4fbf64; --btn: #1a251e; --btn-border: #2d3f33; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --bg: #0f1511; --fg: #e3ece4; --muted: #8fa393;
+    --board: #16201a; --grid: #1c2922; --snake: #4fbf64; --head: #9bf0a8;
+    --food: #ff6b57; --accent: #4fbf64; --btn: #1a251e; --btn-border: #2d3f33; color-scheme: dark; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font); user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; margin: 0;
+    padding-block: 24px; padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  main { max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  h1 { font-size: 1.6rem; margin: 0; letter-spacing: -0.01em; }
+  .bar { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .stats { display: flex; gap: 18px; font-variant-numeric: tabular-nums; color: var(--muted); font-size: .95rem; }
+  .stats b { color: var(--fg); font-size: 1.15rem; }
+  .wrap { position: relative; }
+  canvas { display: block; width: 100%; aspect-ratio: 1; background: var(--board); border-radius: 6px; touch-action: none; }
+  .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    background: color-mix(in srgb, var(--bg) 78%, transparent); border-radius: 6px; text-align: center; padding: 16px; }
+  .overlay[hidden] { display: none; }
+  .overlay h2 { margin: 0; font-size: 1.5rem; }
+  .overlay p { margin: 0; color: var(--muted); }
+  button { font: inherit; cursor: pointer; background: var(--btn); color: var(--fg); border: 1px solid var(--btn-border); border-radius: 6px; padding: 10px 18px; }
+  button.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+  button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .pad { display: grid; grid-template-columns: repeat(3, 64px); grid-template-rows: repeat(2, 56px); gap: 8px; justify-content: center; }
+  .pad button { padding: 0; font-size: 1.2rem; }
+  .pad .up { grid-column: 2; } .pad .left { grid-row: 2; grid-column: 1; } .pad .down { grid-row: 2; grid-column: 2; } .pad .right { grid-row: 2; grid-column: 3; }
+  .hint { color: var(--muted); font-size: .85rem; text-align: center; margin: 0; }
+</style>
+</head>
+<body>
+<main>
+  <div class="bar">
+    <h1>Serpent Rush</h1>
+    <div class="stats"><span>Score <b id="score">0</b></span><span>Best <b id="best">0</b></span></div>
+  </div>
+  <div class="wrap">
+    <canvas id="c" width="400" height="400" aria-label="Snake game board"></canvas>
+    <div class="overlay" id="overlay">
+      <h2 id="otitle">Ready?</h2>
+      <p id="otext">Arrow keys, WASD or swipe to steer.</p>
+      <button class="primary" id="play" type="button">Play</button>
+    </div>
+  </div>
+  <div class="pad" aria-label="Direction buttons">
+    <button class="up" type="button" data-d="0,-1" aria-label="Up">↑</button>
+    <button class="left" type="button" data-d="-1,0" aria-label="Left">←</button>
+    <button class="down" type="button" data-d="0,1" aria-label="Down">↓</button>
+    <button class="right" type="button" data-d="1,0" aria-label="Right">→</button>
+  </div>
+  <p class="hint">Eat the red food. Don't hit the walls or yourself. Space pauses.</p>
+</main>
+<script>
+(function () {
+  var cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  var N = 20, S = cv.width / N;
+  var snake, dir, nextDir, food, score = 0, best = 0, timer = null, state = 'ready';
+  try { best = +localStorage.getItem('snake-best') || 0; } catch (e) {}
+  var $ = function (id) { return document.getElementById(id); };
+  var css = function (v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); };
+  $('best').textContent = best;
+
+  function init() {
+    snake = [{x: 10, y: 10}, {x: 9, y: 10}, {x: 8, y: 10}];
+    dir = nextDir = {x: 1, y: 0}; score = 0;
+    $('score').textContent = 0; placeFood(); draw();
+  }
+  function placeFood() {
+    do { food = {x: Math.floor(Math.random() * N), y: Math.floor(Math.random() * N)}; }
+    while (snake.some(function (s) { return s.x === food.x && s.y === food.y; }));
+  }
+  function start() {
+    if (state === 'over' || state === 'ready') init();
+    state = 'run'; $('overlay').hidden = true;
+    clearInterval(timer); timer = setInterval(tick, 110);
+  }
+  function pause() {
+    if (state !== 'run') return;
+    state = 'paused'; clearInterval(timer);
+    $('otitle').textContent = 'Paused'; $('otext').textContent = 'Press Space or Play to continue.';
+    $('play').textContent = 'Resume'; $('overlay').hidden = false;
+  }
+  function end() {
+    state = 'over'; clearInterval(timer);
+    $('otitle').textContent = 'Game over';
+    $('otext').textContent = 'You scored ' + score + (score >= best && score > 0 ? ' (new best!)' : '') + '.';
+    $('play').textContent = 'Play again'; $('overlay').hidden = false;
+  }
+  function tick() {
+    dir = nextDir;
+    var h = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
+    if (h.x < 0 || h.y < 0 || h.x >= N || h.y >= N || snake.some(function (s) { return s.x === h.x && s.y === h.y; })) { draw(); end(); return; }
+    snake.unshift(h);
+    if (h.x === food.x && h.y === food.y) {
+      score++; $('score').textContent = score;
+      if (score > best) { best = score; $('best').textContent = best; try { localStorage.setItem('snake-best', best); } catch (e) {} }
+      placeFood();
+    } else snake.pop();
+    draw();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = css('--grid');
+    for (var i = 0; i < N; i++) for (var j = 0; j < N; j++) if ((i + j) % 2) ctx.fillRect(i * S, j * S, S, S);
+    ctx.fillStyle = css('--food');
+    ctx.beginPath(); ctx.arc(food.x * S + S / 2, food.y * S + S / 2, S / 2 - 3, 0, 6.2832); ctx.fill();
+    snake.forEach(function (s, k) {
+      ctx.fillStyle = k ? css('--snake') : css('--head');
+      ctx.fillRect(s.x * S + 1, s.y * S + 1, S - 2, S - 2);
+    });
+  }
+  function turn(x, y) {
+    if (state === 'ready' || state === 'over') start();
+    else if (state === 'paused') start();
+    if (x !== -dir.x || y !== -dir.y) nextDir = {x: x, y: y};
+  }
+  addEventListener('keydown', function (e) {
+    var k = e.key.toLowerCase();
+    if (k === 'arrowup' || k === 'w') turn(0, -1);
+    else if (k === 'arrowdown' || k === 's') turn(0, 1);
+    else if (k === 'arrowleft' || k === 'a') turn(-1, 0);
+    else if (k === 'arrowright' || k === 'd') turn(1, 0);
+    else if (k === ' ') { state === 'run' ? pause() : start(); }
+    else return;
+    e.preventDefault();
+  });
+  var t0;
+  cv.addEventListener('touchstart', function (e) { t0 = e.touches[0]; }, {passive: true});
+  cv.addEventListener('touchend', function (e) {
+    if (!t0) return;
+    var t = e.changedTouches[0], dx = t.clientX - t0.clientX, dy = t.clientY - t0.clientY;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return;
+    if (Math.abs(dx) > Math.abs(dy)) turn(dx > 0 ? 1 : -1, 0); else turn(0, dy > 0 ? 1 : -1);
+  });
+  document.querySelectorAll('.pad button').forEach(function (b) {
+    b.addEventListener('click', function () { var d = b.dataset.d.split(','); turn(+d[0], +d[1]); });
+  });
+  $('play').addEventListener('click', start);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { draw(); });
+  init();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "serpent-rush",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Serpent Rush, a snake game packaged for Android with Capacitor.",
+  "scripts": {
+    "serve": "npx http-server www -p 8080",
+    "android:add": "cap add android",
+    "android:sync": "cap sync android",
+    "android:open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}
