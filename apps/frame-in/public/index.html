@@ -4,110 +4,166 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Frame In</title>
+<meta name="description" content="Calm, considered eyewear. Frames, lenses and prescriptions, delivered to your door.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Outfit:wght@300;400;500&display=swap">
 <style>
-  /* Layout: sticky header, promo hero, shape picker, filterable product grid, cart drawer, product dialog */
+  /* Layout: quiet sticky header, airy hero with a slowly floating frame, shape tiles, generous product grid, soft dialogs */
   :root {
-    --bg: #f5f6f8; --panel: #ffffff; --ink: #111c2b; --muted: #5d6b7e; --line: #dfe3ea;
-    --accent: #ffc83d; --accent-ink: #111c2b; --deep: #111c2b; --deep-fg: #f5f6f8; --sale: #c2331f;
-    --tile: #eceff4; --display: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif; --text: "DM Sans", system-ui, sans-serif;
+    --bg: #eef2ef; --bg2: #e3eae6; --panel: #fafbfa; --ink: #1b2a27; --muted: #5f706b; --line: #d3dcd8;
+    --accent: #4a7a6b; --accent-ink: #ffffff; --brass: #9c7a4d; --deep: #1f3b36; --deep-fg: #eef4f1;
+    --sale: #a3473b; --tile: #e6ede9; --shadow: 0 10px 30px -14px rgba(31, 59, 54, .28);
+    --display: "Outfit", "Hanken Grotesk", system-ui, sans-serif; --text: "Hanken Grotesk", system-ui, sans-serif;
   }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-    --bg: #0c121b; --panel: #151d29; --ink: #eef1f6; --muted: #93a0b3; --line: #263142;
-    --accent: #ffc83d; --accent-ink: #111c2b; --deep: #1c2738; --deep-fg: #eef1f6; --sale: #ff7a66; --tile: #1d2736; color-scheme: dark; } }
+    --bg: #0e1715; --bg2: #121e1b; --panel: #15211e; --ink: #e8efec; --muted: #94a7a1; --line: #243430;
+    --accent: #7fb3a2; --accent-ink: #0e1715; --brass: #c9a574; --deep: #19302b; --deep-fg: #e8efec;
+    --sale: #e88b7c; --tile: #1a2a26; --shadow: 0 10px 30px -14px rgba(0, 0, 0, .6); color-scheme: dark; } }
   :root[data-theme="dark"] {
-    --bg: #0c121b; --panel: #151d29; --ink: #eef1f6; --muted: #93a0b3; --line: #263142;
-    --accent: #ffc83d; --accent-ink: #111c2b; --deep: #1c2738; --deep-fg: #eef1f6; --sale: #ff7a66; --tile: #1d2736; color-scheme: dark; }
+    --bg: #0e1715; --bg2: #121e1b; --panel: #15211e; --ink: #e8efec; --muted: #94a7a1; --line: #243430;
+    --accent: #7fb3a2; --accent-ink: #0e1715; --brass: #c9a574; --deep: #19302b; --deep-fg: #e8efec;
+    --sale: #e88b7c; --tile: #1a2a26; --shadow: 0 10px 30px -14px rgba(0, 0, 0, .6); color-scheme: dark; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--text);
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 var(--text);
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-  .wrap { max-width: 1160px; margin: 0 auto; }
-  h1, h2, h3 { font-family: var(--display); margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 400; margin: 0; letter-spacing: -.01em; text-wrap: balance; line-height: 1.12; }
   button { font: inherit; color: inherit; cursor: pointer; }
-  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .sr { position: absolute; left: -9999px; }
   body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--panel); z-index: 30; }
-  header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--panel); border-bottom: 1px solid var(--line);
-    padding: 10px 0 0; }
-  .bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-  .logo { font: 800 1.6rem var(--display); letter-spacing: -.03em; display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); }
-  .logo i { display: inline-block; width: 28px; height: 18px; border: 3px solid var(--ink); border-radius: 9px; position: relative; background: var(--accent); }
-  .search { flex: 1; min-width: 180px; position: relative; }
-  .search input { width: 100%; font: inherit; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
-  .icons { display: flex; gap: 6px; margin-left: auto; }
-  .ib { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; display: flex; gap: 6px; align-items: center; }
-  .ib b { background: var(--accent); color: var(--accent-ink); border-radius: 999px; min-width: 22px; text-align: center; font-size: .8rem; padding: 0 6px; }
-  nav { display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; }
-  nav button { background: none; border: 0; border-bottom: 3px solid transparent; padding: 8px 12px; white-space: nowrap; font-weight: 500; color: var(--muted); }
-  nav button[aria-pressed="true"] { color: var(--ink); border-color: var(--accent); font-weight: 700; }
-  .hero { margin-top: 20px; background: var(--deep); color: var(--deep-fg); border-radius: 18px; padding: clamp(22px, 5vw, 48px); display: grid; grid-template-columns: 1.1fr .9fr; gap: 20px; align-items: center; overflow: hidden; }
-  .hero h1 { font-size: clamp(2rem, 5.5vw, 3.6rem); line-height: 1.04; }
-  .hero h1 em { font-style: normal; background: var(--accent); color: var(--accent-ink); padding: 0 .18em; border-radius: 8px; }
-  .hero p { color: color-mix(in srgb, var(--deep-fg) 78%, transparent); max-width: 44ch; margin: 14px 0 20px; }
-  .cta { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px; padding: 12px 24px; font-weight: 700; }
-  .hero svg { width: 100%; height: auto; max-height: 240px; }
-  .perks { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 14px 0 0; padding: 0; list-style: none; }
-  .perks li { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: .92rem; }
-  .perks b { display: block; font-family: var(--display); }
-  section { margin-top: 36px; }
-  .head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-  .head h2 { font-size: 1.6rem; }
-  .shapes { display: flex; gap: 8px; flex-wrap: wrap; }
-  .chip { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 7px 14px; font-size: .92rem; }
-  .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-  select { font: inherit; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-  .card { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
-  .tile { position: relative; background: var(--tile); aspect-ratio: 5/3; display: grid; place-items: center; cursor: pointer; border: 0; width: 100%; padding: 12px; }
-  .tile svg { width: 82%; height: auto; }
-  .tag { position: absolute; left: 10px; top: 10px; background: var(--ink); color: var(--bg); font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
-  .heart { position: absolute; right: 8px; top: 8px; background: var(--panel); border: 1px solid var(--line); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 1.05rem; }
+
+  header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); padding: 12px 0 0; }
+  .bar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .logo { font: 400 1.65rem var(--display); letter-spacing: .02em; display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+  .logo i { width: 30px; height: 18px; border: 2px solid var(--accent); border-radius: 10px; display: inline-block; position: relative; }
+  .logo i::after { content: ""; position: absolute; inset: 3px; border-radius: 6px; background: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .search { flex: 1; min-width: 180px; }
+  .search input { width: 100%; font: inherit; padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+  .search input::placeholder { color: var(--muted); }
+  .icons { display: flex; gap: 8px; margin-left: auto; }
+  .ib { background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 8px 15px; display: flex; gap: 8px; align-items: center; transition: background .3s, border-color .3s; }
+  .ib:hover { background: var(--bg); border-color: var(--accent); }
+  .ib b { background: var(--accent); color: var(--accent-ink); border-radius: 999px; min-width: 22px; text-align: center; font-size: .78rem; padding: 0 6px; font-weight: 500; }
+  nav { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 0; scrollbar-width: none; }
+  nav button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 14px; white-space: nowrap; color: var(--muted); letter-spacing: .01em; transition: color .3s; }
+  nav button:hover { color: var(--ink); }
+  nav button[aria-pressed="true"] { color: var(--ink); border-color: var(--accent); }
+
+  .hero { margin-top: 24px; border-radius: 28px; overflow: hidden; position: relative; isolation: isolate;
+    background: radial-gradient(120% 120% at 85% 10%, color-mix(in srgb, var(--accent) 38%, var(--deep)) 0%, var(--deep) 55%);
+    color: var(--deep-fg); padding: clamp(28px, 6vw, 72px); display: grid; grid-template-columns: 1.05fr .95fr; gap: 24px; align-items: center; }
+  .hero::before, .hero::after { content: ""; position: absolute; border-radius: 50%; z-index: -1; filter: blur(50px); opacity: .5; }
+  .hero::before { width: 320px; height: 320px; right: -60px; top: -80px; background: color-mix(in srgb, var(--accent) 60%, transparent); }
+  .hero::after { width: 260px; height: 260px; left: 30%; bottom: -120px; background: color-mix(in srgb, var(--brass) 40%, transparent); }
+  .eyebrow { letter-spacing: .18em; text-transform: uppercase; font-size: .75rem; opacity: .75; margin-bottom: 14px; }
+  .hero h1 { font-size: clamp(2.2rem, 5.4vw, 4rem); font-weight: 300; }
+  .hero p { opacity: .82; max-width: 44ch; margin: 18px 0 28px; font-size: 1.05rem; }
+  .cta { background: var(--deep-fg); color: var(--deep); border: 0; border-radius: 999px; padding: 14px 30px; font-weight: 500; letter-spacing: .01em; transition: transform .4s ease, box-shadow .4s ease; box-shadow: 0 8px 24px -10px rgba(0,0,0,.5); }
+  .cta:hover { transform: translateY(-2px); }
+  .cta.solid { background: var(--accent); color: var(--accent-ink); }
+  .cta[disabled] { opacity: .6; cursor: default; transform: none; }
+  .ghost { background: none; border: 1px solid color-mix(in srgb, var(--deep-fg) 40%, transparent); color: var(--deep-fg); border-radius: 999px; padding: 13px 24px; margin-left: 8px; }
+  .float { animation: float 8s ease-in-out infinite; }
+  .hero svg { width: 100%; height: auto; max-height: 260px; filter: drop-shadow(0 24px 28px rgba(0, 0, 0, .3)); }
+  @keyframes float { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-12px) rotate(1deg); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .rise { animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; }
+  .d1 { animation-delay: .1s; } .d2 { animation-delay: .25s; } .d3 { animation-delay: .4s; }
+
+  .perks { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0 0; padding: 0; list-style: none; }
+  .perks li { padding: 16px 18px; border-radius: 18px; background: var(--panel); border: 1px solid var(--line); font-size: .93rem; color: var(--muted); }
+  .perks b { display: block; font: 400 1.05rem var(--display); color: var(--ink); margin-bottom: 2px; }
+  section { margin-top: 64px; }
+  .head { display: flex; justify-content: space-between; align-items: end; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+  .head h2 { font-size: clamp(1.6rem, 3.4vw, 2.3rem); font-weight: 300; }
+  .head p { margin: 4px 0 0; color: var(--muted); }
+  .shapeRow { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+  .shapeTile { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 14px 10px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: transform .5s ease, box-shadow .5s ease, border-color .4s; }
+  .shapeTile:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--accent); }
+  .shapeTile[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+  .shapeTile svg { width: 100%; max-width: 130px; height: auto; }
+  .shapeTile span { font-size: .9rem; }
+  select { font: inherit; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 22px; }
+  .card { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; transition: transform .6s cubic-bezier(.2, .7, .2, 1), box-shadow .6s ease; animation: rise .8s cubic-bezier(.2, .7, .2, 1) both; }
+  .card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+  .tile { position: relative; background: radial-gradient(90% 90% at 50% 30%, color-mix(in srgb, var(--panel) 60%, var(--tile)), var(--tile)); aspect-ratio: 5/3.4; display: grid; place-items: center; cursor: pointer; border: 0; width: 100%; padding: 14px; }
+  .tile svg { width: 84%; height: auto; transition: transform .8s ease; }
+  .card:hover .tile svg { transform: scale(1.04); }
+  .tag { position: absolute; left: 14px; top: 14px; background: color-mix(in srgb, var(--panel) 85%, transparent); color: var(--muted); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; padding: 4px 11px; border-radius: 999px; }
+  .heart { position: absolute; right: 12px; top: 12px; background: color-mix(in srgb, var(--panel) 85%, transparent); border: 0; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 1.1rem; z-index: 1; }
   .heart[aria-pressed="true"] { color: var(--sale); }
-  .info { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
-  .info h3 { font-size: 1.05rem; }
-  .sub { color: var(--muted); font-size: .85rem; }
-  .price { font-weight: 700; } .price s { color: var(--muted); font-weight: 400; margin-left: 6px; } .price em { font-style: normal; color: var(--sale); font-size: .85rem; margin-left: 6px; }
-  .sw { display: flex; gap: 6px; }
-  .sw button { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--line); padding: 0; }
-  .sw button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); }
-  .add { margin-top: auto; background: var(--ink); color: var(--bg); border: 0; border-radius: 8px; padding: 10px; font-weight: 700; }
-  .empty { color: var(--muted); padding: 40px 0; text-align: center; }
-  footer { margin: 48px 0 24px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  dialog { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 0; border-radius: 16px; }
-  dialog::backdrop { background: rgba(8, 12, 20, .55); }
-  #drawer { margin: 0 0 0 auto; height: 100%; max-height: 100%; width: min(420px, 100vw); border-radius: 16px 0 0 16px; }
-  .dr { display: flex; flex-direction: column; height: 100%; padding: 16px; gap: 12px; }
-  .dr header { position: static; border: 0; margin: 0; padding: 0; display: flex; justify-content: space-between; align-items: center; }
-  .lines { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-  .line { display: grid; grid-template-columns: 84px 1fr; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 8px; }
-  .line .t { background: var(--tile); border-radius: 8px; display: grid; place-items: center; padding: 4px; }
-  .qty { display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; }
-  .qty button { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); }
-  .tot { display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; }
-  .note { color: var(--muted); font-size: .8rem; margin: 0; }
-  #pd { width: min(780px, calc(100vw - 24px)); }
-  .pdg { display: grid; grid-template-columns: 1.1fr 1fr; }
-  .pdg .tile { aspect-ratio: auto; min-height: 280px; cursor: default; }
-  .pdg .side { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-  .x { background: none; border: 1px solid var(--line); border-radius: 50%; width: 34px; height: 34px; }
+  .stock { position: absolute; left: 14px; bottom: 12px; font-size: .78rem; color: var(--sale); }
+  .info { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .info h3 { font-size: 1.25rem; }
+  .sub { color: var(--muted); font-size: .88rem; }
+  .price { font-weight: 500; } .price s { color: var(--muted); font-weight: 400; margin-left: 8px; } .price em { font-style: normal; color: var(--brass); font-size: .85rem; margin-left: 8px; }
+  .sw { display: flex; gap: 8px; align-items: center; }
+  .sw button { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--line); padding: 0; transition: box-shadow .3s; position: relative; }
+  .sw button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent); }
+  .sw button.out::after { content: ""; position: absolute; left: 3px; right: 3px; top: 50%; border-top: 2px solid var(--panel); transform: rotate(-45deg); }
+  .add { margin-top: auto; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 14px; padding: 12px; font-weight: 500; transition: filter .3s; }
+  .add:hover { filter: brightness(1.08); }
+  .add[disabled] { background: var(--line); color: var(--muted); cursor: default; filter: none; }
+  .empty { color: var(--muted); padding: 50px 0; text-align: center; grid-column: 1 / -1; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; counter-reset: s; }
+  .steps div { padding: 22px; border-radius: 22px; background: var(--bg2); }
+  .steps h3 { font-size: 1.2rem; margin-bottom: 6px; }
+  .steps p { margin: 0; color: var(--muted); }
+  footer { margin: 72px 0 28px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+  footer button { background: none; border: 0; padding: 0; text-decoration: underline; color: inherit; }
+
+  dialog { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 0; border-radius: 24px; box-shadow: 0 30px 80px -20px rgba(0,0,0,.4); }
+  dialog::backdrop { background: rgba(14, 23, 21, .5); backdrop-filter: blur(3px); }
+  dialog[open] { animation: rise .45s cubic-bezier(.2, .7, .2, 1) both; }
+  #drawer { margin: 0 0 0 auto; height: 100%; max-height: 100%; width: min(440px, 100vw); border-radius: 24px 0 0 24px; }
+  .dr { display: flex; flex-direction: column; height: 100%; padding: 20px; gap: 14px; }
+  .dr > header { position: static; border: 0; padding: 0; background: none; backdrop-filter: none; display: flex; justify-content: space-between; align-items: center; }
+  .dr h2 { font-size: 1.5rem; font-weight: 300; }
+  .lines { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+  .line { display: grid; grid-template-columns: 92px 1fr; gap: 12px; border: 1px solid var(--line); border-radius: 16px; padding: 10px; }
+  .line .t { background: var(--tile); border-radius: 12px; display: grid; place-items: center; padding: 4px; align-self: start; }
+  .qty { display: inline-flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .qty button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); }
+  .rm { background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: .82rem; margin-left: 8px; }
+  .sumrow { display: flex; justify-content: space-between; color: var(--muted); font-size: .95rem; }
+  .sumrow.tot { color: var(--ink); font-weight: 500; font-size: 1.15rem; }
+  .ship { font-size: .85rem; color: var(--muted); }
+  .bar2 { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 4px; } .bar2 i { display: block; height: 100%; background: var(--accent); transition: width .8s ease; }
+  .coupon { display: flex; gap: 8px; }
+  .coupon input, .f2 input, .f2 textarea { font: inherit; padding: 10px 13px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+  .coupon button { background: var(--bg2); border: 1px solid var(--line); border-radius: 12px; padding: 0 16px; }
+  .note { color: var(--muted); font-size: .82rem; margin: 0; }
+  .err { color: var(--sale); }
+  .ok { color: var(--accent); }
   .f2 { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; } .f3 { display: flex; gap: 10px; }
   .f2 label { font-size: .85rem; color: var(--muted); }
-  .f2 input { font: inherit; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); width: 100%; }
-  .pay { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
-  .pay label { display: flex; gap: 8px; align-items: center; }
-  .err { color: var(--sale); }
-  #co { width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 24px); }
-  #co .dr { height: auto; max-height: calc(100vh - 24px); }
-  .done { text-align: center; padding: 18px 4px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-  .done b { font: 800 1.4rem var(--display); }
-  #toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; z-index: 50; opacity: 0; pointer-events: none; transition: opacity .2s; }
-  #toast.on { opacity: 1; }
-  @media (max-width: 720px) { .hero, .pdg { grid-template-columns: 1fr; } .ib span.l { display: none; } }
-  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
+  .pay { border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; margin: 0; }
+  .pay label { display: flex; gap: 10px; align-items: center; }
+  #co, #tr { width: min(480px, calc(100vw - 24px)); max-height: calc(100vh - 24px); }
+  #co .dr, #tr .dr { height: auto; max-height: calc(100vh - 24px); }
+  .done { text-align: center; padding: 22px 6px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  .done b { font: 300 1.7rem var(--display); }
+  .x { background: none; border: 1px solid var(--line); border-radius: 50%; width: 36px; height: 36px; }
+  #pd { width: min(860px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow-y: auto; }
+  .pdg { display: grid; grid-template-columns: 1.05fr 1fr; }
+  .pdg .tile { aspect-ratio: auto; min-height: 320px; cursor: default; }
+  .pdg .side { padding: 26px; display: flex; flex-direction: column; gap: 12px; }
+  .lens { display: flex; flex-direction: column; gap: 6px; border: 0; padding: 0; margin: 0; }
+  .lens label { display: flex; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; cursor: pointer; font-size: .92rem; }
+  .lens label:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+  .lens span { margin-left: auto; color: var(--muted); }
+  .tl { display: flex; justify-content: space-between; gap: 6px; margin: 8px 0; }
+  .tl div { flex: 1; text-align: center; font-size: .82rem; color: var(--muted); } .tl div::before { content: ""; display: block; height: 6px; border-radius: 99px; background: var(--line); margin-bottom: 6px; }
+  .tl div.on { color: var(--ink); } .tl div.on::before { background: var(--accent); }
+  #toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(10px); background: var(--deep); color: var(--deep-fg); padding: 12px 22px; border-radius: 999px; z-index: 60; opacity: 0; pointer-events: none; transition: opacity .5s, transform .5s; }
+  #toast.on { opacity: 1; transform: translateX(-50%); }
+  @media (max-width: 760px) { .hero, .pdg { grid-template-columns: 1fr; } .ib .l { display: none; } .hero svg { max-height: 180px; } .ghost { margin: 10px 0 0; } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } html { scroll-behavior: auto; } }
 </style>
-
 </head>
 <body>
 <div class="wrap">
@@ -116,8 +172,9 @@
     <a class="logo" href="#top" id="top"><i></i>Frame In</a>
     <div class="search"><label class="sr" for="q">Search frames</label><input id="q" type="search" placeholder="Search round, aviator, blue light…" autocomplete="off"></div>
     <div class="icons">
-      <button class="ib" id="wishBtn" type="button" aria-label="Wishlist">♥ <span class="l">Saved</span> <b id="wc">0</b></button>
-      <button class="ib" id="cartBtn" type="button" aria-label="Cart">🛒 <span class="l">Cart</span> <b id="cc">0</b></button>
+      <button class="ib" id="trackBtn" type="button"><span class="l">Track order</span><span class="sr">Track order</span>📦</button>
+      <button class="ib" id="wishBtn" type="button" aria-label="Saved frames">♡ <span class="l">Saved</span> <b id="wc">0</b></button>
+      <button class="ib" id="cartBtn" type="button" aria-label="Cart">🛍 <span class="l">Cart</span> <b id="cc">0</b></button>
     </div>
   </div>
   <nav id="cats" aria-label="Categories"></nav>
@@ -125,49 +182,73 @@
 
 <div class="hero">
   <div>
-    <h1>Frames that fit your <em>face</em>, not the other way round.</h1>
-    <p>Eyeglasses, sunglasses and screen glasses with prescription lenses included. Pick a shape, pick a color, and see it before you buy.</p>
-    <button class="cta" id="shop" type="button">Shop all frames</button>
+    <div class="eyebrow rise">Eyeglasses · Sunglasses · Screen glasses</div>
+    <h1 class="rise d1">Slow down.<br>See clearly.</h1>
+    <p class="rise d2">Frames chosen for comfort, lenses made to your prescription, delivered quietly to your door.</p>
+    <div class="rise d3"><button class="cta" id="shop" type="button">Explore frames</button><button class="ghost" id="howBtn" type="button">How it works</button></div>
   </div>
-  <div id="heroArt" aria-hidden="true"></div>
+  <div id="heroArt" class="float" aria-hidden="true"></div>
 </div>
 <ul class="perks">
-  <li><b>Lenses included</b>Single vision lenses come with every frame.</li>
-  <li><b>14-day returns</b>Not the right fit? Send it back.</li>
-  <li><b>Free eye test</b>Book a slot at a nearby store.</li>
-  <li><b>1-year warranty</b>On frame and hinge defects.</li>
+  <li><b>Free shipping</b>On orders above ₹1,499.</li>
+  <li><b>Your lenses, your way</b>Clear, blue-light, polarised or prescription.</li>
+  <li><b>Pay how you like</b>UPI, cards, netbanking or cash on delivery.</li>
+  <li><b>Follow your order</b>Track it any time with your mobile number.</li>
 </ul>
+
+<section>
+  <div class="head"><div><h2>Find your shape</h2><p>Start with the outline that feels like you.</p></div></div>
+  <div class="shapeRow" id="shapeRow"></div>
+</section>
 
 <section id="products">
   <div class="head">
-    <h2 id="ptitle">All frames</h2>
-    <label class="sub">Sort <select id="sort"><option value="pop">Popular</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select></label>
+    <div><h2 id="ptitle">All frames</h2><p id="pcount"></p></div>
+    <label class="sub">Sort <select id="sort"><option value="pop">Recommended</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select></label>
   </div>
-  <div class="shapes" id="shapes" role="group" aria-label="Filter by shape" style="margin-bottom:16px"></div>
-  <div class="grid" id="grid"></div>
+  <div class="grid" id="grid" aria-live="polite"></div>
 </section>
 
-<footer><span>© Frame In. Prices in INR.</span><span>Eyeglasses · Sunglasses · Screen glasses · Kids</span></footer>
+<section id="how">
+  <div class="head"><div><h2>Three calm steps</h2></div></div>
+  <div class="steps">
+    <div><h3>1. Choose a frame</h3><p>Browse by shape and color. Every frame shows what's in stock.</p></div>
+    <div><h3>2. Pick your lenses</h3><p>Clear, blue-light, polarised or prescription. Add your prescription now or after you order.</p></div>
+    <div><h3>3. Relax</h3><p>Pay online or on delivery, then follow your order with just your mobile number.</p></div>
+  </div>
+</section>
+
+<footer><span>© Frame In · Prices in INR</span><span><button id="trackBtn2" type="button">Track your order</button></span></footer>
 </div>
 
 <dialog id="drawer"><div class="dr">
   <header><h2>Your cart</h2><button class="x" id="closeCart" type="button" aria-label="Close cart">✕</button></header>
   <div class="lines" id="lines"></div>
-  <div class="tot"><span>Total</span><span id="total">₹0</span></div>
-  <button class="cta" id="checkout" type="button">Checkout</button>
-  <p class="note">Demo store. No payment is taken and no order is placed.</p>
+  <div id="cartFoot">
+    <div class="ship" id="shipMsg"></div><div class="bar2"><i id="shipBar" style="width:0"></i></div>
+    <form class="coupon" id="couponForm" style="margin:12px 0"><label class="sr" for="cpn">Coupon code</label><input id="cpn" placeholder="Coupon code (try WELCOME10)" autocomplete="off"><button type="submit">Apply</button></form>
+    <p class="note" id="cpnMsg" role="status"></p>
+    <div class="sumrow"><span>Subtotal</span><span id="sSub">₹0</span></div>
+    <div class="sumrow" id="sDiscRow" hidden><span>Discount</span><span id="sDisc"></span></div>
+    <div class="sumrow"><span>Shipping</span><span id="sShip"></span></div>
+    <div class="sumrow tot"><span>Total</span><span id="total">₹0</span></div>
+  </div>
+  <button class="cta solid" id="checkout" type="button">Checkout</button>
 </div></dialog>
 
 <dialog id="pd"><div class="pdg">
   <div class="tile" id="pdTile"></div>
   <div class="side">
-    <div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><h2 id="pdName"></h2><button class="x" id="closePd" type="button" aria-label="Close">✕</button></div>
-    <div class="sub" id="pdSub"></div><div class="price" id="pdPrice"></div>
-    <div class="sub">Color: <b id="pdColor"></b></div><div class="sw" id="pdSw"></div>
-    <p class="sub" id="pdDesc"></p>
+    <div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><h2 id="pdName" style="font-size:1.9rem"></h2><button class="x" id="closePd" type="button" aria-label="Close">✕</button></div>
+    <div class="sub" id="pdSub"></div><div class="price" id="pdPrice" style="font-size:1.15rem"></div>
+    <div class="sub">Color: <b id="pdColor"></b> <span id="pdStock"></span></div><div class="sw" id="pdSw"></div>
+    <fieldset class="lens" id="pdLens"><legend class="sub" style="margin-bottom:6px">Lenses</legend></fieldset>
+    <div class="f2" id="rxBox" hidden><label for="rx">Prescription (optional now)</label><textarea id="rx" rows="2" maxlength="240" placeholder="e.g. Right -1.25 / Left -1.00. Leave blank and we'll ask after you order."></textarea></div>
+    <p class="sub" id="pdDesc" style="margin:0"></p>
     <button class="add" id="pdAdd" type="button">Add to cart</button>
   </div>
 </div></dialog>
+
 <dialog id="co"><form class="dr" id="coForm" novalidate>
   <header><h2 id="coTitle">Checkout</h2><button class="x" id="closeCo" type="button" aria-label="Close">✕</button></header>
   <div id="coBody" class="lines">
@@ -177,14 +258,22 @@
     <div class="f2"><label for="ca">Address</label><input id="ca" autocomplete="street-address" required></div>
     <div class="f3"><div class="f2"><label for="cc2">City</label><input id="cc2" autocomplete="address-level2" required></div>
     <div class="f2"><label for="cz">Pincode</label><input id="cz" inputmode="numeric" maxlength="6" autocomplete="postal-code" required></div></div>
-    <fieldset class="pay"><legend>Payment</legend>
+    <fieldset class="pay"><legend class="sub">Payment</legend>
       <label id="payOnlineRow"><input type="radio" name="pay" value="online"> Pay online (UPI, cards, netbanking)</label>
       <label><input type="radio" name="pay" value="cod" checked> Cash on delivery</label>
     </fieldset>
-    <div class="tot"><span>Total</span><span id="coTotal"></span></div>
+    <div class="sumrow tot"><span>Total</span><span id="coTotal"></span></div>
     <p class="note err" id="coErr" role="alert" hidden></p>
   </div>
-  <button class="cta" id="coPlace" type="submit">Place order</button>
+  <button class="cta solid" id="coPlace" type="submit">Place order</button>
+</form></dialog>
+
+<dialog id="tr"><form class="dr" id="trForm">
+  <header><h2>Track your order</h2><button class="x" id="closeTr" type="button" aria-label="Close">✕</button></header>
+  <div class="f2"><label for="to">Order number</label><input id="to" placeholder="FI-XXXXXXXX" autocomplete="off"></div>
+  <div class="f2"><label for="tp">Mobile number used at checkout</label><input id="tp" inputmode="numeric" maxlength="10"></div>
+  <button class="cta solid" type="submit">Find my order</button>
+  <div id="trOut" aria-live="polite"></div>
 </form></dialog>
 <div id="toast" role="status"></div>
 
@@ -195,8 +284,7 @@
     get: function (k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
     set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   };
-  var C = { black: ['Black', '#1b1d22'], tort: ['Tortoise', '#8a5a2b'], navy: ['Navy', '#22407a'], gold: ['Gold', '#c59a3b'], silver: ['Silver', '#aab2bd'], rose: ['Rose', '#c9707f'], green: ['Forest', '#2e6b4f'], clear: ['Crystal', '#9fb8c9'], red: ['Cherry', '#b3262f'] };
-  var P = [];
+  var C = { black: ['Black', '#22252b'], tort: ['Tortoise', '#8a5a2b'], navy: ['Navy', '#2a4680'], gold: ['Gold', '#c59a3b'], silver: ['Silver', '#aab2bd'], rose: ['Rose', '#c9707f'], green: ['Forest', '#2f6b52'], clear: ['Crystal', '#9fb8c9'], red: ['Cherry', '#b3262f'] };
   var TYPE = { eye: 'Eyeglasses', sun: 'Sunglasses', screen: 'Screen glasses', kids: 'Kids' };
   var SHAPE = { round: 'Round', rect: 'Rectangle', aviator: 'Aviator', cat: 'Cat-eye', hex: 'Hexagon', way: 'Wayfarer' };
   var LENS = {
@@ -209,28 +297,38 @@
   };
   function glasses(shape, hex, type) {
     var d = LENS[shape], sun = type === 'sun';
-    var fill = sun ? 'rgba(20,24,32,.78)' : type === 'screen' ? 'rgba(120,170,255,.22)' : 'rgba(150,190,220,.2)';
-    var s = 'stroke="' + hex + '" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"';
-    return '<svg viewBox="0 0 200 80" role="img" aria-label="' + SHAPE[shape] + ' frame"><g fill="none" ' + s + '>' +
-      '<path d="M34 28L6 32M166 28L194 32"/><path d="M87 34Q100 26 113 34"/></g>' +
+    var fill = sun ? 'rgba(24,30,38,.72)' : type === 'screen' ? 'rgba(130,175,255,.2)' : 'rgba(165,200,225,.18)';
+    var s = 'stroke="' + hex + '" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"';
+    return '<svg viewBox="0 0 200 90" role="img" aria-label="' + SHAPE[shape] + ' frame"><ellipse cx="100" cy="78" rx="62" ry="4" fill="rgba(0,0,0,.09)"/>' +
+      '<g fill="none" ' + s + '><path d="M34 28L6 32M166 28L194 32"/><path d="M87 34Q100 26 113 34"/></g>' +
       '<g transform="translate(60 40)"><path d="' + d + '" fill="' + fill + '" ' + s + '/></g>' +
       '<g transform="translate(140 40) scale(-1 1)"><path d="' + d + '" fill="' + fill + '" ' + s + '/></g>' +
-      '<path d="M44 30q8-6 18-6" fill="none" stroke="#fff" stroke-opacity="' + (sun ? .35 : .55) + '" stroke-width="2.4" stroke-linecap="round"/></svg>';
+      '<path d="M44 29q8-6 18-6M124 29q8-6 18-6" fill="none" stroke="#fff" stroke-opacity="' + (sun ? .32 : .6) + '" stroke-width="2.2" stroke-linecap="round"/></svg>';
   }
 
+  var P = [], cfg = { online: false, lenses: {}, shipping: { freeOver: 1499, fee: 79 } };
   var st = { cat: 'all', shape: 'all', q: '', sort: 'pop', pick: {} };
-  var cart = store.get('fi-cart', []), wish = store.get('fi-wish', []);
-  var toastT;
-  function toast(m) { var t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('on'); }, 1800); }
+  var cart = store.get('fi2-cart', []), wish = store.get('fi2-wish', []), coupon = '', qt = null, toastT;
+  function save() { store.set('fi2-cart', cart); store.set('fi2-wish', wish); }
+  function toast(m) { var t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('on'); }, 2200); }
   function money(n) { return '₹' + n.toLocaleString('en-IN'); }
-  function pick(p) { return st.pick[p.id] || p.colors[0]; }
-  function save() { store.set('fi-cart', cart); store.set('fi-wish', wish); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function api(path, opts) {
+    opts = opts || {}; opts.headers = { 'Content-Type': 'application/json' };
+    if (opts.body && typeof opts.body !== 'string') opts.body = JSON.stringify(opts.body);
+    return fetch(path, opts).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'Something went wrong. Please try again.'); return j; }); });
+  }
+  function pick(p) { var c = st.pick[p.id]; if (c && p.colors.indexOf(c) >= 0) return c; return p.colors.filter(function (k) { return p.stock[k] > 0; })[0] || p.colors[0]; }
+  function lensOpts(p) { return cfg.lenses[p.type] || []; }
+  function lensOf(p, id) { return lensOpts(p).filter(function (o) { return o.id === id; })[0] || lensOpts(p)[0]; }
 
   function renderCats() {
     var items = [['all', 'All'], ['eye', 'Eyeglasses'], ['sun', 'Sunglasses'], ['screen', 'Screen glasses'], ['kids', 'Kids'], ['wish', 'Saved']];
     $('cats').innerHTML = items.map(function (c) { return '<button type="button" data-c="' + c[0] + '" aria-pressed="' + (st.cat === c[0]) + '">' + c[1] + '</button>'; }).join('');
-    var sh = [['all', 'All shapes']].concat(Object.keys(SHAPE).map(function (k) { return [k, SHAPE[k]]; }));
-    $('shapes').innerHTML = sh.map(function (c) { return '<button class="chip" type="button" data-s="' + c[0] + '" aria-pressed="' + (st.shape === c[0]) + '">' + c[1] + '</button>'; }).join('');
+    var rep = { round: 'black', rect: 'navy', aviator: 'gold', cat: 'rose', hex: 'green', way: 'tort' };
+    $('shapeRow').innerHTML = Object.keys(SHAPE).map(function (k) {
+      return '<button class="shapeTile" type="button" data-s="' + k + '" aria-pressed="' + (st.shape === k) + '">' + glasses(k, C[rep[k]][1], 'eye') + '<span>' + SHAPE[k] + '</span></button>';
+    }).join('');
   }
   function list() {
     var q = st.q.toLowerCase();
@@ -245,73 +343,90 @@
     else r.sort(function (a, b) { return b.pop - a.pop || a.id - b.id; });
     return r;
   }
+  function stockNote(p, c) { var n = p.stock[c]; return n <= 0 ? 'Sold out' : n <= 3 ? 'Only ' + n + ' left' : ''; }
   function renderGrid() {
     var r = list(), names = { all: 'All frames', wish: 'Saved frames' };
-    $('ptitle').textContent = names[st.cat] || TYPE[st.cat];
-    if (!r.length) { $('grid').innerHTML = '<p class="empty">' + (st.cat === 'wish' ? 'No saved frames yet. Tap the heart on any frame.' : 'No frames match. Try another shape or search.') + '</p>'; return; }
-    $('grid').innerHTML = r.map(function (p) {
-      var c = pick(p), off = Math.round((1 - p.price / p.was) * 100);
-      return '<article class="card"><button class="tile" type="button" data-open="' + p.id + '" aria-label="View ' + p.name + '">' + glasses(p.shape, C[c][1], p.type) +
-        '<span class="tag">' + TYPE[p.type] + '</span></button>' +
+    $('ptitle').textContent = (names[st.cat] || TYPE[st.cat]) + (st.shape !== 'all' ? ' · ' + SHAPE[st.shape] : '');
+    $('pcount').textContent = r.length + (r.length === 1 ? ' frame' : ' frames');
+    if (!r.length) { $('grid').innerHTML = '<p class="empty">' + (st.cat === 'wish' ? 'Nothing saved yet. Tap the heart on any frame.' : 'No frames match. Try another shape or search.') + '</p>'; return; }
+    $('grid').innerHTML = r.map(function (p, i) {
+      var c = pick(p), off = Math.round((1 - p.price / p.was) * 100), sn = stockNote(p, c), out = p.stock[c] <= 0;
+      return '<article class="card" style="animation-delay:' + Math.min(i, 8) * 60 + 'ms"><button class="tile" type="button" data-open="' + p.id + '" aria-label="View ' + p.name + '">' + glasses(p.shape, C[c][1], p.type) +
+        '<span class="tag">' + TYPE[p.type] + '</span>' + (sn ? '<span class="stock">' + sn + '</span>' : '') + '</button>' +
         '<button class="heart" type="button" data-w="' + p.id + '" aria-pressed="' + (wish.indexOf(p.id) >= 0) + '" aria-label="Save ' + p.name + '">' + (wish.indexOf(p.id) >= 0 ? '♥' : '♡') + '</button>' +
         '<div class="info"><h3>' + p.name + '</h3><div class="sub">' + SHAPE[p.shape] + ' · ' + p.gender + '</div>' +
         '<div class="price">' + money(p.price) + '<s>' + money(p.was) + '</s><em>' + off + '% off</em></div>' +
-        '<div class="sw">' + p.colors.map(function (k) { return '<button type="button" data-p="' + p.id + '" data-k="' + k + '" aria-pressed="' + (k === c) + '" aria-label="' + C[k][0] + '" style="background:' + C[k][1] + '"></button>'; }).join('') + '</div>' +
-        '<button class="add" type="button" data-a="' + p.id + '">Add to cart</button></div></article>';
+        '<div class="sw">' + p.colors.map(function (k) { return '<button type="button" class="' + (p.stock[k] <= 0 ? 'out' : '') + '" data-p="' + p.id + '" data-k="' + k + '" aria-pressed="' + (k === c) + '" aria-label="' + C[k][0] + (p.stock[k] <= 0 ? ' (sold out)' : '') + '" style="background:' + C[k][1] + '"></button>'; }).join('') + '</div>' +
+        '<button class="add" type="button" data-open="' + p.id + '"' + (out ? ' disabled' : '') + '>' + (out ? 'Sold out' : 'Choose lenses') + '</button></div></article>';
     }).join('');
   }
+
+  /* ---------- cart ---------- */
+  function lineKey(l) { return l.id + '|' + l.c + '|' + l.lens; }
   function renderCart() {
-    var n = 0, tot = 0;
+    var n = 0; cart.forEach(function (l) { n += l.q; });
+    $('cc').textContent = n; $('wc').textContent = wish.length;
     $('lines').innerHTML = cart.length ? cart.map(function (l, i) {
-      var p = P[l.id]; n += l.q; tot += p.price * l.q;
-      return '<div class="line"><div class="t">' + glasses(p.shape, C[l.c][1], p.type) + '</div><div><b>' + p.name + '</b><div class="sub">' + C[l.c][0] + ' · ' + money(p.price) + '</div>' +
-        '<div class="qty"><button type="button" data-q="' + i + '" data-d="-1" aria-label="Fewer">−</button>' + l.q + '<button type="button" data-q="' + i + '" data-d="1" aria-label="More">+</button></div></div></div>';
-    }).join('') : '<p class="empty">Your cart is empty.</p>';
-    $('total').textContent = money(tot); $('cc').textContent = n; $('wc').textContent = wish.length;
+      var p = P[l.id], lo = lensOf(p, l.lens);
+      return '<div class="line"><div class="t">' + glasses(p.shape, C[l.c][1], p.type) + '</div><div><b>' + p.name + '</b><div class="sub">' + C[l.c][0] + ' · ' + esc(lo.name) + '</div>' +
+        '<div class="sub">' + money(p.price + lo.price) + ' each</div>' + (l.rx ? '<div class="sub">Rx: ' + esc(l.rx) + '</div>' : (lo.rx ? '<div class="sub">Prescription: we will ask after you order</div>' : '')) +
+        '<div class="qty"><button type="button" data-q="' + i + '" data-d="-1" aria-label="Fewer">−</button>' + l.q + '<button type="button" data-q="' + i + '" data-d="1" aria-label="More">+</button><button class="rm" type="button" data-rm="' + i + '">Remove</button></div></div></div>';
+    }).join('') : '<p class="note" style="padding:30px 0;text-align:center">Your cart is empty. Take your time.</p>';
+    $('cartFoot').hidden = !cart.length; $('checkout').disabled = !cart.length;
+    refreshQuote();
   }
-  function add(id, c) {
-    var f = cart.filter(function (l) { return l.id === id && l.c === c; })[0];
-    if (f) f.q++; else cart.push({ id: id, c: c, q: 1 });
-    save(); renderCart(); toast(P[id].name + ' added to cart');
+  function refreshQuote() {
+    if (!cart.length) { qt = null; return; }
+    var mine = JSON.stringify(cart) + coupon;
+    api('/api/quote', { method: 'POST', body: { items: cart.map(toItem), coupon: coupon } }).then(function (q) {
+      if (mine !== JSON.stringify(cart) + coupon) return;
+      qt = q; paintQuote();
+    }).catch(function (e) { $('cpnMsg').textContent = e.message; });
   }
+  function toItem(l) { return { id: l.id, color: l.c, qty: l.q, lens: l.lens, rx: l.rx || '' }; }
+  function paintQuote() {
+    if (!qt) return;
+    $('sSub').textContent = money(qt.subtotal); $('sDiscRow').hidden = !qt.discount; $('sDisc').textContent = '−' + money(qt.discount);
+    $('sShip').textContent = qt.shipping ? money(qt.shipping) : 'Free'; $('total').textContent = money(qt.total); $('coTotal').textContent = money(qt.total);
+    var fo = cfg.shipping.freeOver;
+    $('shipMsg').textContent = qt.freeShippingAway ? 'Add ' + money(qt.freeShippingAway) + ' more for free shipping' : 'You have free shipping';
+    $('shipBar').style.width = Math.min(100, ((qt.subtotal - qt.discount) / fo) * 100) + '%';
+    var m = $('cpnMsg'); m.className = 'note ' + (qt.coupon ? 'ok' : qt.couponError ? 'err' : '');
+    m.textContent = qt.coupon ? qt.coupon.code + ' applied: ' + qt.coupon.label : qt.couponError || '';
+  }
+  function add(p, c, lensId, rx) {
+    if (p.stock[c] <= 0) return toast('That color is sold out');
+    var f = cart.filter(function (l) { return l.id === p.id && l.c === c && l.lens === lensId; })[0];
+    var inCart = cart.reduce(function (s, l) { return s + (l.id === p.id && l.c === c ? l.q : 0); }, 0);
+    if (inCart >= p.stock[c]) return toast('That is all we have in stock');
+    if (f) { f.q = Math.min(10, f.q + 1); if (rx) f.rx = rx; } else cart.push({ id: p.id, c: c, lens: lensId, q: 1, rx: rx || '' });
+    save(); renderCart(); toast(p.name + ' added to your cart');
+  }
+
+  /* ---------- product dialog ---------- */
   function openPd(id) {
-    var p = P[id]; function draw() {
-      var c = pick(p);
+    var p = P[id], lensId = lensOpts(p)[0].id;
+    function draw() {
+      var c = pick(p), lo = lensOf(p, lensId), sn = stockNote(p, c);
       $('pdTile').innerHTML = glasses(p.shape, C[c][1], p.type); $('pdName').textContent = p.name;
       $('pdSub').textContent = TYPE[p.type] + ' · ' + SHAPE[p.shape] + ' · ' + p.gender;
-      $('pdPrice').innerHTML = money(p.price) + '<s>' + money(p.was) + '</s>'; $('pdColor').textContent = C[c][0]; $('pdDesc').textContent = p.desc;
-      $('pdSw').innerHTML = p.colors.map(function (k) { return '<button type="button" data-pk="' + k + '" aria-pressed="' + (k === c) + '" aria-label="' + C[k][0] + '" style="background:' + C[k][1] + '"></button>'; }).join('');
-      $('pdAdd').onclick = function () { add(id, pick(p)); };
+      $('pdPrice').innerHTML = money(p.price + lo.price) + '<s>' + money(p.was + lo.price) + '</s>';
+      $('pdColor').textContent = C[c][0]; $('pdStock').textContent = sn ? '· ' + sn : ''; $('pdDesc').textContent = p.desc;
+      $('pdSw').innerHTML = p.colors.map(function (k) { return '<button type="button" class="' + (p.stock[k] <= 0 ? 'out' : '') + '" data-pk="' + k + '" aria-pressed="' + (k === c) + '" aria-label="' + C[k][0] + '" style="background:' + C[k][1] + '"></button>'; }).join('');
+      $('pdLens').innerHTML = '<legend class="sub" style="margin-bottom:6px">Lenses</legend>' + lensOpts(p).map(function (o) {
+        return '<label><input type="radio" name="lens" value="' + o.id + '"' + (o.id === lensId ? ' checked' : '') + '> ' + esc(o.name) + '<span>' + (o.price ? '+' + money(o.price) : 'Included') + '</span></label>';
+      }).join('');
+      $('rxBox').hidden = !lo.rx;
+      $('pdAdd').disabled = p.stock[c] <= 0; $('pdAdd').textContent = p.stock[c] <= 0 ? 'Sold out' : 'Add to cart · ' + money(p.price + lo.price);
     }
-    $('pdSw').onclick = function (e) { var k = e.target.dataset.pk; if (k) { st.pick[id] = k; draw(); renderGrid(); } };
+    $('rx').value = '';
+    $('pdSw').onclick = function (e) { var k = e.target.dataset && e.target.dataset.pk; if (k) { st.pick[id] = k; draw(); renderGrid(); } };
+    $('pdLens').onchange = function (e) { lensId = e.target.value; draw(); };
+    $('pdAdd').onclick = function () { add(p, pick(p), lensId, lensOf(p, lensId).rx ? $('rx').value.trim() : ''); $('pd').close(); };
     draw(); $('pd').showModal();
   }
 
-  document.addEventListener('click', function (e) {
-    var t = e.target.closest('button'); if (!t) return;
-    var d = t.dataset;
-    if (d.c) { st.cat = d.c; renderCats(); renderGrid(); }
-    else if (d.s) { st.shape = d.s; renderCats(); renderGrid(); }
-    else if (d.p) { st.pick[+d.p] = d.k; renderGrid(); }
-    else if (d.a) add(+d.a, pick(P[+d.a]));
-    else if (d.w) { var id = +d.w, i = wish.indexOf(id); if (i < 0) wish.push(id); else wish.splice(i, 1); save(); renderCart(); renderGrid(); }
-    else if (d.open) openPd(+d.open);
-    else if (d.q) { var l = cart[+d.q]; l.q += +d.d; if (l.q < 1) cart.splice(+d.q, 1); save(); renderCart(); }
-  });
-  $('q').addEventListener('input', function () { st.q = this.value; renderGrid(); });
-  $('sort').onchange = function () { st.sort = this.value; renderGrid(); };
-  $('cartBtn').onclick = function () { $('drawer').showModal(); };
-  $('closeCart').onclick = function () { $('drawer').close(); };
-  $('closePd').onclick = function () { $('pd').close(); };
-  $('wishBtn').onclick = function () { st.cat = 'wish'; renderCats(); renderGrid(); $('products').scrollIntoView({ behavior: 'smooth' }); };
-  $('shop').onclick = function () { st.cat = 'all'; renderCats(); renderGrid(); $('products').scrollIntoView({ behavior: 'smooth' }); };
-  var cfg = { online: false, keyId: null };
-  function api(path, opts) {
-    opts = opts || {}; opts.headers = { 'Content-Type': 'application/json' };
-    if (opts.body && typeof opts.body !== 'string') opts.body = JSON.stringify(opts.body);
-    return fetch(path, opts).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'Request failed'); return j; }); });
-  }
-  function cartTotal() { return cart.reduce(function (s, l) { return s + P[l.id].price * l.q; }, 0); }
+  /* ---------- checkout ---------- */
   function coErr(m) { var e = $('coErr'); e.hidden = !m; e.textContent = m || ''; }
   function loadRzp() {
     return new Promise(function (ok, no) {
@@ -322,29 +437,28 @@
     });
   }
   function success(o) {
-    cart = []; save(); renderCart(); $('closeCart') && $('drawer').close();
+    cart = []; coupon = ''; $('cpn').value = ''; save(); renderCart();
     $('coTitle').textContent = 'Order placed';
-    $('coForm').querySelector('#coBody').innerHTML = '<div class="done"><b>Thank you!</b><div>Your order <b>' + o.id + '</b> is confirmed.</div><div class="sub">' +
-      (o.method === 'cod' ? 'Pay ' + money(o.total) + ' in cash when it arrives.' : 'Payment of ' + money(o.total) + ' received.') + '</div><div class="sub">Keep this order number for support.</div></div>';
+    $('coBody').innerHTML = '<div class="done"><b>Thank you</b><div>Your order <b style="font:500 1.1rem var(--text)">' + o.id + '</b> is confirmed.</div><div class="sub">' +
+      (o.method === 'cod' ? 'Pay ' + money(o.total) + ' in cash when it arrives.' : 'Payment of ' + money(o.total) + ' received.') +
+      '</div><div class="sub">Track it any time with this order number and your mobile number.</div></div>';
     $('coPlace').textContent = 'Continue shopping'; $('coPlace').type = 'button'; $('coPlace').onclick = function () { location.reload(); };
   }
-  $('checkout').onclick = function () {
-    if (!cart.length) return toast('Add a frame first');
-    $('drawer').close(); coErr('');
-    $('coTotal').textContent = money(cartTotal());
+  function openCheckout() {
+    if (!cart.length) return;
+    $('drawer').close(); coErr(''); paintQuote();
     $('payOnlineRow').hidden = !cfg.online;
     if (!cfg.online) $('coForm').querySelector('input[value="cod"]').checked = true;
     $('co').showModal();
-  };
-  $('closeCo').onclick = function () { $('co').close(); };
+  }
   $('coForm').addEventListener('submit', function (e) {
     e.preventDefault(); if ($('coPlace').type === 'button') return;
     var method = $('coForm').querySelector('input[name="pay"]:checked').value, btn = $('coPlace');
     var body = {
-      items: cart.map(function (l) { return { id: l.id, color: l.c, qty: l.q }; }), method: method,
+      items: cart.map(toItem), method: method, coupon: coupon,
       customer: { name: $('cn').value, phone: $('cp').value, email: $('ce').value, address: $('ca').value, city: $('cc2').value, pincode: $('cz').value }
     };
-    coErr(''); btn.disabled = true; btn.textContent = 'Placing order…';
+    coErr(''); btn.disabled = true; btn.textContent = 'Placing your order…';
     function fail(err) { btn.disabled = false; btn.textContent = 'Place order'; coErr(err.message); }
     api('/api/orders', { method: 'POST', body: body }).then(function (o) {
       if (method === 'cod') return success({ id: o.orderId, method: 'cod', total: o.total });
@@ -355,22 +469,65 @@
           prefill: { name: body.customer.name, contact: body.customer.phone, email: body.customer.email },
           handler: function (resp) {
             api('/api/payments/verify', { method: 'POST', body: { orderId: o.orderId, token: o.token, razorpay_order_id: resp.razorpay_order_id, razorpay_payment_id: resp.razorpay_payment_id, razorpay_signature: resp.razorpay_signature } })
-              .then(function (v) { success({ id: o.orderId, method: 'online', total: o.total }); })
+              .then(function () { success({ id: o.orderId, method: 'online', total: o.total }); })
               .catch(function (err) { fail(new Error(err.message + ' If money was deducted, quote order ' + o.orderId + ' to support.')); });
           },
-          modal: { ondismiss: function () { fail(new Error('Payment was not completed. Your order ' + o.orderId + ' is saved; place the order again to retry.')); } }
+          modal: { ondismiss: function () { fail(new Error('Payment was not completed. Order ' + o.orderId + ' is held for 30 minutes; you can place the order again to retry.')); } }
         });
         rz.on('payment.failed', function (r2) { fail(new Error((r2 && r2.error && r2.error.description) || 'Payment failed. Try again.')); });
         rz.open();
       });
-    }).catch(fail);
+    }).catch(function (err) { fail(err); if (/sold out|down to/.test(err.message)) { api('/api/products').then(function (r) { P = r; renderGrid(); }); } });
   });
-  ['drawer', 'pd'].forEach(function (id) { $(id).addEventListener('click', function (e) { if (e.target === this) this.close(); }); });
 
-  $('heroArt').innerHTML = glasses('round', '#ffc83d', 'eye');
+  /* ---------- tracking ---------- */
+  $('trForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var out = $('trOut'); out.innerHTML = '<p class="note">Looking…</p>';
+    api('/api/track', { method: 'POST', body: { orderId: $('to').value, phone: $('tp').value } }).then(function (o) {
+      var step = { placed: 1, paid: 1, pending_payment: 0, shipped: 2, delivered: 3 }[o.status];
+      var labels = ['Confirmed', 'Shipped', 'Delivered'];
+      var html = '<p><b>' + o.id + '</b> · ' + money(o.total) + ' · ' + (o.method === 'cod' ? 'Cash on delivery' : 'Paid online') + '</p>';
+      if (o.status === 'cancelled') html += '<p class="err">This order was cancelled.</p>';
+      else if (o.status === 'pending_payment') html += '<p class="note">Waiting for payment. Unpaid orders are released after 30 minutes.</p>';
+      else html += '<div class="tl">' + labels.map(function (l, i) { return '<div class="' + (i < step ? 'on' : '') + '">' + l + '</div>'; }).join('') + '</div>';
+      if (o.tracking) html += '<p class="note">Courier: ' + esc(o.tracking) + '</p>';
+      html += '<p class="note">' + o.items.map(function (l) { return l.qty + ' × ' + esc(l.name) + ' (' + esc(l.lensName) + ')'; }).join('<br>') + '</p>';
+      out.innerHTML = html;
+    }).catch(function (err) { out.innerHTML = '<p class="err">' + esc(err.message) + '</p>'; });
+  });
+
+  /* ---------- wiring ---------- */
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('button'); if (!t) return;
+    var d = t.dataset;
+    if (d.c) { st.cat = d.c; renderCats(); renderGrid(); }
+    else if (d.s) { st.shape = st.shape === d.s ? 'all' : d.s; renderCats(); renderGrid(); $('products').scrollIntoView({ behavior: 'smooth' }); }
+    else if (d.p) { st.pick[+d.p] = d.k; renderGrid(); }
+    else if (d.w) { var id = +d.w, i = wish.indexOf(id); if (i < 0) wish.push(id); else wish.splice(i, 1); save(); renderCart(); renderGrid(); }
+    else if (d.open) openPd(+d.open);
+    else if (d.q) { var l = cart[+d.q], p = P[l.id]; l.q += +d.d; if (l.q < 1) cart.splice(+d.q, 1); else if (l.q > Math.min(10, p.stock[l.c])) { l.q = Math.min(10, p.stock[l.c]); toast('That is all we have in stock'); } save(); renderCart(); }
+    else if (d.rm) { cart.splice(+d.rm, 1); save(); renderCart(); }
+  });
+  $('q').addEventListener('input', function () { st.q = this.value; renderGrid(); });
+  $('sort').onchange = function () { st.sort = this.value; renderGrid(); };
+  $('cartBtn').onclick = function () { $('drawer').showModal(); refreshQuote(); };
+  $('closeCart').onclick = function () { $('drawer').close(); };
+  $('closePd').onclick = function () { $('pd').close(); };
+  $('closeCo').onclick = function () { $('co').close(); };
+  $('closeTr').onclick = function () { $('tr').close(); };
+  $('trackBtn').onclick = $('trackBtn2').onclick = function () { $('trOut').innerHTML = ''; $('tr').showModal(); };
+  $('wishBtn').onclick = function () { st.cat = 'wish'; renderCats(); renderGrid(); $('products').scrollIntoView({ behavior: 'smooth' }); };
+  $('shop').onclick = function () { st.cat = 'all'; st.shape = 'all'; renderCats(); renderGrid(); $('products').scrollIntoView({ behavior: 'smooth' }); };
+  $('howBtn').onclick = function () { $('how').scrollIntoView({ behavior: 'smooth' }); };
+  $('checkout').onclick = openCheckout;
+  $('couponForm').addEventListener('submit', function (e) { e.preventDefault(); coupon = $('cpn').value.trim(); refreshQuote(); });
+  ['drawer', 'pd', 'co', 'tr'].forEach(function (id) { $(id).addEventListener('click', function (e) { if (e.target === this) this.close(); }); });
+
+  $('heroArt').innerHTML = glasses('round', '#e9d9b8', 'eye');
   Promise.all([api('/api/products'), api('/api/config')]).then(function (r) {
     P = r[0]; cfg = r[1];
-    cart = cart.filter(function (l) { return P[l.id] && P[l.id].colors.indexOf(l.c) >= 0; });
+    cart = cart.filter(function (l) { var p = P[l.id]; return p && p.colors.indexOf(l.c) >= 0 && lensOpts(p).some(function (o) { return o.id === l.lens; }); });
     wish = wish.filter(function (id) { return P[id]; });
     renderCats(); renderGrid(); renderCart();
   }).catch(function () { $('grid').innerHTML = '<p class="empty">Could not load frames. Please refresh.</p>'; });

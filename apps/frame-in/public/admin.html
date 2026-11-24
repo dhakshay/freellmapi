@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Frame In Admin</title>
+<style>
+  :root { --bg: #eef2ef; --panel: #fafbfa; --ink: #1b2a27; --muted: #5f706b; --line: #d3dcd8; --accent: #4a7a6b; --accent-ink: #fff; --sale: #a3473b; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0e1715; --panel: #15211e; --ink: #e8efec; --muted: #94a7a1; --line: #243430; --accent: #7fb3a2; --accent-ink: #0e1715; --sale: #e88b7c; color-scheme: dark; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, sans-serif; padding: 20px max(16px, env(safe-area-inset-left, 0px)); }
+  main { max-width: 1100px; margin: 0 auto; }
+  h1 { font-weight: 400; margin: 0 0 14px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  input, select, button { font: inherit; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); }
+  button.p { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); cursor: pointer; }
+  button[aria-pressed="true"] { border-color: var(--accent); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+  .card .top { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .muted { color: var(--muted); font-size: .88rem; }
+  .err { color: var(--sale); }
+  .stock { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .stock label { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+  .stock input { width: 80px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Frame In admin</h1>
+  <form class="row" id="login"><label class="muted" for="tok">Admin token</label><input id="tok" type="password" autocomplete="off"><button class="p" type="submit">Sign in</button><span class="err" id="msg"></span></form>
+  <div id="app" hidden>
+    <div class="row"><button id="tOrders" type="button" aria-pressed="true">Orders</button><button id="tStock" type="button" aria-pressed="false">Stock</button><button id="reload" type="button">Refresh</button></div>
+    <div id="orders"></div>
+    <div id="stock" class="stock" hidden></div>
+  </div>
+</main>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var tok = ''; try { tok = sessionStorage.getItem('fi-admin') || ''; } catch (e) {}
+  var STATUS = ['pending_payment', 'placed', 'paid', 'shipped', 'delivered', 'cancelled'];
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function api(path, method, body) {
+    return fetch(path, { method: method || 'GET', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok }, body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Failed'); return j; }); });
+  }
+  function load() {
+    return Promise.all([api('/api/admin/orders'), api('/api/admin/stock')]).then(function (r) {
+      $('login').hidden = true; $('app').hidden = false;
+      $('orders').innerHTML = r[0].length ? r[0].map(function (o) {
+        var c = o.customer;
+        return '<div class="card"><div class="top"><b>' + esc(o.id) + '</b><span class="muted">' + new Date(o.created_at).toLocaleString() + ' · ₹' + o.total + ' · ' + esc(o.method) + '</span></div>' +
+          '<div>' + esc(c.name) + ' · ' + esc(c.phone) + (c.email ? ' · ' + esc(c.email) : '') + '</div><div class="muted">' + esc(c.address) + ', ' + esc(c.city) + ' ' + esc(c.pincode) + '</div>' +
+          '<div class="muted">' + o.items.map(function (l) { return l.qty + ' × ' + esc(l.name) + ' (' + esc(l.color) + ', ' + esc(l.lensName) + ')' + (l.rx ? ' Rx: ' + esc(l.rx) : ''); }).join('<br>') + '</div>' +
+          '<div class="row" style="margin:10px 0 0"><select data-s="' + esc(o.id) + '">' + STATUS.map(function (s) { return '<option' + (s === o.status ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select>' +
+          '<input data-t="' + esc(o.id) + '" placeholder="Courier / tracking" value="' + esc(o.tracking) + '"><button class="p" data-save="' + esc(o.id) + '" type="button">Save</button></div></div>';
+      }).join('') : '<p class="muted">No orders yet.</p>';
+      $('stock').innerHTML = r[1].map(function (s) {
+        return '<label class="card">' + esc(s.name) + ' · ' + esc(s.color) + '<input type="number" min="0" value="' + s.qty + '" data-p="' + s.product_id + '" data-c="' + esc(s.color) + '"></label>';
+      }).join('');
+    });
+  }
+  $('login').addEventListener('submit', function (e) {
+    e.preventDefault(); tok = $('tok').value;
+    load().then(function () { try { sessionStorage.setItem('fi-admin', tok); } catch (e) {} }).catch(function (err) { $('msg').textContent = err.message; });
+  });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.save) {
+      var id = b.dataset.save;
+      api('/api/admin/orders/' + id, 'PATCH', { status: document.querySelector('[data-s="' + id + '"]').value, tracking: document.querySelector('[data-t="' + id + '"]').value })
+        .then(function () { b.textContent = 'Saved'; return load(); }).catch(function (err) { alert(err.message); });
+    }
+  });
+  $('stock').addEventListener('change', function (e) {
+    var i = e.target; if (!i.dataset.p) return;
+    api('/api/admin/stock', 'PUT', { product_id: +i.dataset.p, color: i.dataset.c, qty: parseInt(i.value, 10) }).catch(function (err) { alert(err.message); load(); });
+  });
+  $('tOrders').onclick = function () { $('orders').hidden = false; $('stock').hidden = true; $('tOrders').setAttribute('aria-pressed', 'true'); $('tStock').setAttribute('aria-pressed', 'false'); };
+  $('tStock').onclick = function () { $('orders').hidden = true; $('stock').hidden = false; $('tOrders').setAttribute('aria-pressed', 'false'); $('tStock').setAttribute('aria-pressed', 'true'); };
+  $('reload').onclick = load;
+  if (tok) load().catch(function () { tok = ''; });
+})();
+</script>
+</body>
+</html>

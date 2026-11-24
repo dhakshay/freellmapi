@@ -23,3 +23,40 @@ const rows = [
 export const PRODUCTS = rows.map((a, i) => ({
   id: i, name: a[0], type: a[1], shape: a[2], gender: a[3], price: a[4], was: a[5], colors: a[6], desc: a[7], pop: i % 5,
 }));
+
+// Lens choices by product type. Prices are whole rupees added to the frame price.
+// rx: true means the customer should provide a prescription (now or after ordering).
+export const LENS_OPTIONS = {
+  eye: [
+    { id: 'clear', name: 'Clear lenses, no power', price: 0, rx: false },
+    { id: 'blue', name: 'Blue-light protection, no power', price: 399, rx: false },
+    { id: 'rx', name: 'Prescription, single vision', price: 499, rx: true },
+    { id: 'prog', name: 'Prescription, progressive', price: 1299, rx: true },
+  ],
+  sun: [
+    { id: 'uv', name: 'UV400 tinted', price: 0, rx: false },
+    { id: 'polar', name: 'Polarised', price: 499, rx: false },
+    { id: 'rxsun', name: 'Prescription, tinted', price: 799, rx: true },
+  ],
+  screen: [
+    { id: 'blue', name: 'Blue-light, no power', price: 0, rx: false },
+    { id: 'rx', name: 'Blue-light with prescription', price: 499, rx: true },
+  ],
+  kids: [
+    { id: 'clear', name: 'Clear lenses, no power', price: 0, rx: false },
+    { id: 'rx', name: 'Prescription, single vision', price: 399, rx: true },
+  ],
+};
+
+export const SHIPPING = { freeOver: 1499, fee: 79 };
+export const COUPONS = {
+  WELCOME10: { label: '10% off', pct: 10 },
+  CALM200: { label: '₹200 off orders above ₹1,999', flat: 200, min: 1999 },
+};
+
+// Starting stock per product and color (admin can change it later).
+export function seedQty(id, colorIndex) {
+  if (id === 6 && colorIndex === 0) return 2; // Pixel in black: low stock
+  if (id === 8 && colorIndex === 0) return 0; // Bloom in cherry: sold out
+  return 8 + ((id * 7 + colorIndex * 3) % 9);
+}

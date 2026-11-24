@@ -97,3 +97,53 @@ test('admin endpoints need the token', async () => {
   assert.equal((await off.call('/api/admin/orders')).status, 404);
   off.close();
 });
+
+test('lens options, shipping fee, coupons', async () => {
+  const s = await boot();
+  const q = (body) => s.call('/api/quote', { method: 'POST', body });
+  const low = (await q({ items: [{ id: 6, color: 'navy', qty: 1 }] })).json; // 999, shipping applies
+  assert.deepEqual([low.subtotal, low.shipping, low.total], [999, 79, 1078]);
+  const lens = (await q({ items: [{ id: 0, color: 'black', qty: 1, lens: 'prog' }] })).json; // 1499 + 1299
+  assert.equal(lens.subtotal, 2798);
+  assert.equal((await q({ items: [{ id: 0, color: 'black', qty: 1, lens: 'polar' }] })).status, 400);
+  const c = (await q({ items: [{ id: 0, color: 'black', qty: 1, lens: 'prog' }], coupon: 'welcome10' })).json;
+  assert.equal(c.discount, 279);
+  assert.equal(c.total, 2798 - 279);
+  const bad = (await q({ items: [{ id: 6, color: 'navy', qty: 1 }], coupon: 'NOPE' })).json;
+  assert.equal(bad.couponError, 'That code is not valid.');
+  assert.equal(bad.discount, 0);
+  s.close();
+});
+
+test('stock is reserved, blocks overselling, and is released on cancel', async () => {
+  const s = await boot({ ADMIN_TOKEN: 'adm' });
+  const h = { Authorization: 'Bearer adm' };
+  const stock = async () => (await s.call('/api/products')).json[6].stock.black;
+  assert.equal(await stock(), 2);
+  const place = (qty) => s.call('/api/orders', { method: 'POST', body: { items: [{ id: 6, color: 'black', qty }], customer, method: 'cod' } });
+  assert.equal((await place(3)).status, 409);
+  const ok = await place(2);
+  assert.equal(ok.status, 201);
+  assert.equal(await stock(), 0);
+  assert.equal((await place(1)).status, 409);
+  await s.call(`/api/admin/orders/${ok.json.orderId}`, { method: 'PATCH', headers: h, body: { status: 'cancelled' } });
+  assert.equal(await stock(), 2);
+  assert.equal((await s.call(`/api/admin/orders/${ok.json.orderId}`, { method: 'PATCH', headers: h, body: { status: 'placed' } })).status, 400);
+  assert.equal((await s.call('/api/admin/stock', { method: 'PUT', headers: h, body: { product_id: 6, color: 'black', qty: 9 } })).status, 200);
+  assert.equal(await stock(), 9);
+  const sold = (await s.call('/api/orders', { method: 'POST', body: { items: [{ id: 8, color: 'red', qty: 1 }], customer, method: 'cod' } }));
+  assert.equal(sold.status, 409);
+  s.close();
+});
+
+test('order tracking needs order number and mobile number', async () => {
+  const s = await boot({ ADMIN_TOKEN: 'adm' });
+  const o = (await s.call('/api/orders', { method: 'POST', body: { items, customer, method: 'cod', coupon: 'CALM200' } })).json;
+  assert.equal(o.total, 4897 - 200);
+  await s.call(`/api/admin/orders/${o.orderId}`, { method: 'PATCH', headers: { Authorization: 'Bearer adm' }, body: { status: 'shipped', tracking: 'Delhivery 12345' } });
+  const t = await s.call('/api/track', { method: 'POST', body: { orderId: o.orderId.toLowerCase(), phone: customer.phone } });
+  assert.equal(t.json.status, 'shipped');
+  assert.equal(t.json.tracking, 'Delhivery 12345');
+  assert.equal((await s.call('/api/track', { method: 'POST', body: { orderId: o.orderId, phone: '9000000000' } })).status, 404);
+  s.close();
+});
