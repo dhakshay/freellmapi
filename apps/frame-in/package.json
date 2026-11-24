@@ -8,9 +8,12 @@
     "start": "node server/index.js",
     "test": "node --test server/app.test.js"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "better-sqlite3": "^12.2.0",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "nodemailer": "^6.10.1"
   }
 }

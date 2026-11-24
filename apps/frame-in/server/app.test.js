@@ -14,7 +14,7 @@ async function boot(env = {}, fetchImpl) {
     const r = await fetch(base + path, { method, headers: { 'Content-Type': 'application/json', ...headers }, body: body && JSON.stringify(body) });
     return { status: r.status, json: await r.json() };
   };
-  return { call, close: () => { server.close(); app.close(); } };
+  return { call, base, close: () => { server.close(); app.close(); } };
 }
 const rzpEnv = { RAZORPAY_KEY_ID: 'rzp_test_x', RAZORPAY_KEY_SECRET: 'secret123', ADMIN_TOKEN: 'adm' };
 const fakeRzp = async () => ({ ok: true, status: 200, json: async () => ({ id: 'order_ABC' }) });
@@ -146,4 +146,32 @@ test('order tracking needs order number and mobile number', async () => {
   assert.equal(t.json.tracking, 'Delhivery 12345');
   assert.equal((await s.call('/api/track', { method: 'POST', body: { orderId: o.orderId, phone: '9000000000' } })).status, 404);
   s.close();
+});
+
+test('information pages, health check, robots and sitemap', async () => {
+  const s = await boot({ SUPPORT_EMAIL: 'help@example.com', RETURN_DAYS: '10', BASE_URL: 'https://shop.example.com/' });
+  const get = async (path) => { const r = await fetch(s.base + path); return { status: r.status, text: await r.text() }; };
+  const ret = await get('/p/returns');
+  assert.equal(ret.status, 200);
+  assert.match(ret.text, /10 days/);
+  assert.match(ret.text, /help@example\.com/);
+  assert.equal((await get('/p/nope')).status, 404);
+  assert.match((await get('/healthz')).text, /"ok":true/);
+  assert.match((await get('/robots.txt')).text, /Sitemap: https:\/\/shop\.example\.com\/sitemap\.xml/);
+  assert.match((await get('/sitemap.xml')).text, /<loc>https:\/\/shop\.example\.com\/p\/privacy<\/loc>/);
+  s.close();
+});
+
+test('emails go out when an order is placed and when it ships', async () => {
+  const sent = [];
+  const mailer = { enabled: true, send: async (kind, o) => { sent.push([kind, o.id, o.customer.email]); } };
+  const app = createApp({ env: { ADMIN_TOKEN: 'adm' }, mailer });
+  const server = await new Promise((ok) => { const x = app.listen(0, () => ok(x)); });
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const j = async (path, method = 'GET', body, headers = {}) => (await fetch(base + path, { method, headers: { 'Content-Type': 'application/json', ...headers }, body: body && JSON.stringify(body) })).json();
+  const o = await j('/api/orders', 'POST', { items, customer, method: 'cod' });
+  await j(`/api/admin/orders/${o.orderId}`, 'PATCH', { status: 'shipped' }, { Authorization: 'Bearer adm' });
+  server.close(); app.close();
+  assert.deepEqual(sent.map((x) => x[0]), ['placed', 'shipped']);
+  assert.equal(sent[0][2], 'a@b.co');
 });

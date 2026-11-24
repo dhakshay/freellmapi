@@ -3,6 +3,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import Database from 'better-sqlite3';
+import { storeConfig } from './store.js';
+import { createMailer } from './mail.js';
+import { renderPage, SLUGS } from './pages.js';
 import { PRODUCTS, LENS_OPTIONS, SHIPPING, COUPONS, seedQty } from './products.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -66,7 +69,10 @@ export function validateOrder(body) {
   return { errors, lines, customer, method };
 }
 
-export function createApp({ dbPath = ':memory:', env = process.env, fetchImpl = globalThis.fetch } = {}) {
+export function createApp({ dbPath = ':memory:', env = process.env, fetchImpl = globalThis.fetch, mailer } = {}) {
+  const store = storeConfig(env);
+  mailer = mailer || createMailer(env, store);
+  const notify = (kind, id) => { const o = db.prepare('SELECT * FROM orders WHERE id = ?').get(id); if (o) mailer.send(kind, { ...publicOrder(o), customer: JSON.parse(o.customer) }); };
   const db = new Database(dbPath);
   db.pragma('journal_mode = WAL');
   db.exec(`CREATE TABLE IF NOT EXISTS orders (
@@ -124,6 +130,7 @@ export function createApp({ dbPath = ':memory:', env = process.env, fetchImpl = 
 
   const app = express();
   app.disable('x-powered-by');
+  if (env.TRUST_PROXY) app.set('trust proxy', env.TRUST_PROXY === 'true' ? 1 : Number(env.TRUST_PROXY) || env.TRUST_PROXY);
   app.use((req, res, next) => {
     res.set({ 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin', 'X-Frame-Options': 'DENY' });
     next();
@@ -140,14 +147,14 @@ export function createApp({ dbPath = ':memory:', env = process.env, fetchImpl = 
       const pay = ev.payload?.payment?.entity, rid = pay?.order_id || ev.payload?.order?.entity?.id;
       const o = rid && db.prepare('SELECT * FROM orders WHERE rzp_order_id = ?').get(rid);
       const amount = pay?.amount ?? ev.payload?.order?.entity?.amount_paid;
-      if (o && o.status === 'pending_payment' && amount === o.total * 100) setStatus.run('paid', pay?.id ?? null, now(), o.id);
+      if (o && o.status === 'pending_payment' && amount === o.total * 100) { setStatus.run('paid', pay?.id ?? null, now(), o.id); notify('placed', o.id); }
     }
     res.json({ ok: true });
   });
 
   app.use(express.json({ limit: '50kb' }));
 
-  app.get('/api/config', (req, res) => res.json({ online, keyId: online ? keyId : null, currency: 'INR', lenses: LENS_OPTIONS, shipping: SHIPPING }));
+  app.get('/api/config', (req, res) => res.json({ online, keyId: online ? keyId : null, currency: 'INR', lenses: LENS_OPTIONS, shipping: SHIPPING, store: { name: store.name, email: store.email, phone: store.phone } }));
   app.get('/api/products', (req, res) => {
     expireUnpaid();
     const rows = db.prepare('SELECT product_id, color, qty FROM stock').all();
@@ -180,6 +187,7 @@ export function createApp({ dbPath = ':memory:', env = process.env, fetchImpl = 
       if (e.stock) return res.status(409).json({ error: e.message });
       throw e;
     }
+    if (method === 'cod') notify('placed', id);
     res.status(201).json({ orderId: id, token, status, total: q.total });
   });
 
@@ -223,7 +231,7 @@ export function createApp({ dbPath = ':memory:', env = process.env, fetchImpl = 
     if (!o || !safeEqual(req.body?.token || '', o.token) || !o.rzp_order_id || o.rzp_order_id !== rid) return res.status(400).json({ error: 'Payment could not be verified.' });
     if (!pid || !safeEqual(sig || '', hmac(keySecret, `${rid}|${pid}`))) return res.status(400).json({ error: 'Payment could not be verified.' });
     if (o.status === 'cancelled') return res.status(409).json({ error: `Order ${o.id} expired before payment arrived. Contact support with payment ${pid} for a refund.` });
-    if (o.status === 'pending_payment') setStatus.run('paid', String(pid), now(), o.id);
+    if (o.status === 'pending_payment') { setStatus.run('paid', String(pid), now(), o.id); notify('placed', o.id); }
     res.json({ ok: true, order: publicOrder(getOrder.get(o.id)) });
   });
 
@@ -254,6 +262,7 @@ export function createApp({ dbPath = ':memory:', env = process.env, fetchImpl = 
       if (s === 'cancelled' && o.status !== 'cancelled') release(JSON.parse(o.items));
       db.prepare('UPDATE orders SET status = ?, tracking = ?, updated_at = ? WHERE id = ?').run(s, tracking, now(), o.id);
     })();
+    if (s === 'shipped' && o.status !== 'shipped') notify('shipped', o.id);
     res.json({ ok: true });
   });
   app.get('/api/admin/stock', admin, (req, res) => res.json(db.prepare('SELECT product_id, color, qty FROM stock ORDER BY product_id, color').all().map((r) => ({ ...r, name: byId.get(r.product_id).name }))));
@@ -264,6 +273,18 @@ export function createApp({ dbPath = ':memory:', env = process.env, fetchImpl = 
     res.status(r.changes ? 200 : 404).json(r.changes ? { ok: true } : { error: 'No such product or color.' });
   });
 
+  app.get('/healthz', (req, res) => { try { db.prepare('SELECT 1').get(); res.json({ ok: true }); } catch { res.status(503).json({ ok: false }); } });
+  app.get('/p/:slug', (req, res) => {
+    const html = renderPage(req.params.slug, store, SHIPPING);
+    if (!html) return res.status(404).send('Page not found');
+    res.type('html').send(html);
+  });
+  app.get('/robots.txt', (req, res) => res.type('text').send(`User-agent: *\nDisallow: /admin.html\nDisallow: /api/\n${store.baseUrl ? `Sitemap: ${store.baseUrl}/sitemap.xml\n` : ''}`));
+  app.get('/sitemap.xml', (req, res) => {
+    if (!store.baseUrl) return res.status(404).end();
+    const urls = ['/', ...SLUGS.map((x) => `/p/${x}`)].map((u) => `<url><loc>${store.baseUrl}${u}</loc></url>`).join('');
+    res.type('xml').send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`);
+  });
   app.use('/api', (req, res) => res.status(404).json({ error: 'Not found.' }));
   app.use(express.static(path.join(here, '..', 'public')));
   app.use((err, req, res, next) => {
