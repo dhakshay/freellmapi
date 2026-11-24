@@ -1,0 +1,6 @@
+{
+  "appId": "com.example.freellmchat",
+  "appName": "FreeLLM Chat",
+  "webDir": "www",
+  "server": { "androidScheme": "https", "cleartext": true }
+}
